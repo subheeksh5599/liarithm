@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkCase, checkVersions } from "@/lib/checker";
+import { blackDiamondVariants } from "@/lib/cases/black-diamond";
 
 const MAX_BYTES = 200_000;
 
@@ -22,4 +23,17 @@ export async function POST(req: Request) {
   }
   const r = checkCase(body);
   return NextResponse.json({ ok: r.ok, versions: [r], issues: [] });
+}
+
+/**
+ * GET runs the checker on the live game's own case, every version. Only pass/fail and counts come back:
+ * the thief and the evidence that convicts them stay secret, so this cannot be used to cheat.
+ */
+export async function GET() {
+  const r = checkVersions(blackDiamondVariants);
+  return NextResponse.json({
+    ok: r.ok,
+    case: "The Black Diamond",
+    versions: r.versions.map((v, i) => ({ version: i + 1, ok: v.ok, issues: v.issues.length, provableLies: v.provableLies.length })),
+  });
 }
