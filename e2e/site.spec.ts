@@ -27,7 +27,7 @@ test.describe("start screen", () => {
     test(`${name} goes to ${path}`, async ({ page }) => {
       await page.goto("/");
       await page.getByRole("link", { name }).first().click();
-      await expect(page).toHaveURL(new RegExp(`${path}$`));
+      await expect(page).toHaveURL(new RegExp(`${path}$`), { timeout: 20_000 }); // a cold serverless start can take seconds
     });
   }
 });
