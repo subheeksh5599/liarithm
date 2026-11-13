@@ -5,3 +5,4 @@ node_modules/
 *.log
 RUNBOOK.md
 .DS_Store
+*.tsbuildinfo
