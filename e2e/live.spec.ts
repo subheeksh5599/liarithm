@@ -13,22 +13,29 @@ const PLAN = {
   ren: { name: "Ren", ask: "Where were you between eight and half past eight tonight?", show: "Office Keycard Log" },
 } as const;
 
-test("question the thief, catch the lie, win", async ({ page }) => {
-  await openCase(page);
-  const thief = await thiefOf(page);
-  const p = PLAN[thief];
-  await page.locator(".suspect", { hasText: p.name }).click();
+for (const target of ["kai", "sora", "jin", "ren"] as const) {
+  test(`${target} as the thief: question them, catch the lie, win`, async ({ page }) => {
+    // Open fresh games until this thief is drawn (each draw is a quarter chance).
+    let thief = "";
+    for (let i = 0; i < 40 && thief !== target; i++) {
+      await openCase(page);
+      thief = await thiefOf(page);
+    }
+    expect(thief).toBe(target);
+    const p = PLAN[target];
+    await page.locator(".suspect", { hasText: p.name }).click();
 
-  await page.locator(".ask input").fill(p.ask);
-  await page.locator(".ask button[type=submit]").click();
-  await expect(page.locator(".chat .bubble")).toHaveCount(2, { timeout: 200_000 });
+    await page.locator(".ask input").fill(p.ask);
+    await page.locator(".ask button[type=submit]").click();
+    await expect(page.locator(".chat .bubble")).toHaveCount(2, { timeout: 200_000 });
 
-  await page.locator(".ev", { hasText: p.show }).click();
-  await page.locator(".ask input").fill("Then explain this.");
-  await page.locator(".ask button[type=submit]").click();
-  await expect(page.locator(".lie-flash")).toBeVisible({ timeout: 200_000 });
-  await page.getByRole("button", { name: "Keep going" }).click();
+    await page.locator(".ev", { hasText: p.show }).click();
+    await page.locator(".ask input").fill("Then explain this.");
+    await page.locator(".ask button[type=submit]").click();
+    await expect(page.locator(".lie-flash")).toBeVisible({ timeout: 200_000 });
+    await page.getByRole("button", { name: "Keep going" }).click();
 
-  await accuse(page, p.name);
-  await expect(page.locator(".overlay .modal h2")).toHaveText(/right/i);
-});
+    await accuse(page, p.name);
+    await expect(page.locator(".overlay .modal h2")).toHaveText(/right/i);
+  });
+}
