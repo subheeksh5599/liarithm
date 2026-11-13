@@ -30,10 +30,10 @@ export default function Menu() {
           <Link href="/cases" className="hot" style={{ left: "60.9%", top: "57.2%", width: "25.4%", height: "6.2%" }}>
             <span className="sr">Case files</span>
           </Link>
-          <Link href="/how" className="hot redraw" style={{ left: "60.9%", top: "64.1%", width: "25.4%", height: "6.2%" }}>
+          <Link href="/how" className="hot redraw" style={{ left: "60.8%", top: "63.6%", width: "25.8%", height: "7.0%" }}>
             <Bars /> How it works
           </Link>
-          <Link href="/studios" className="hot redraw" style={{ left: "60.9%", top: "71.0%", width: "25.4%", height: "6.2%" }}>
+          <Link href="/studios" className="hot redraw" style={{ left: "60.8%", top: "70.6%", width: "25.8%", height: "7.0%" }}>
             <Card /> For studios
           </Link>
           <span className="patch" style={{ left: "60.6%", top: "77.8%", width: "26%", height: "6.6%" }} aria-hidden />
