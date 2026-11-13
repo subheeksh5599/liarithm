@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { blackDiamond as c } from "@/lib/cases/black-diamond";
+import { blackDiamond as c, blackDiamondVariants } from "@/lib/cases/black-diamond";
 import { allowedValues, checkLine, checkMove, findContradictions, judgeAccusation } from "@/lib/referee";
 import type { Move } from "@/lib/types";
 
@@ -94,5 +94,31 @@ describe("the accusation", () => {
 
   it("loses when the proven liar is not the thief", () => {
     expect(judgeAccusation(c, "jin", jinLie).won).toBe(false);
+  });
+});
+
+describe("denials are not leaks", () => {
+  // Found by the leak benchmark: honest denials were being thrown away as if they stated the locked fact.
+  const jin = blackDiamondVariants.find((v) => v.truth.culprit === "jin")!;
+  const deny = move([{ slot: "jin.with_car", value: "yes" }]);
+  const denials = [
+    "No, I never left the car, not once.",
+    "I never went inside that office.",
+    "Sir... I never went inside. I never went up.",
+    "I wasn't upstairs.",
+    "I didn't went in, I swear it.",
+  ];
+  it.each(denials)("%j is a denial, not a leak", (line) => {
+    expect(checkLine(jin, "jin", line, deny, []).leaks.filter((l) => l.startsWith("locked"))).toEqual([]);
+  });
+  const statements = [
+    "Fine. I left the car for a bit.",
+    "I didn't stay, I left the car.",
+    "I went inside to use the washroom.",
+    "Yes I went up the stairs.",
+    "I never said I didn't. I went inside.",
+  ];
+  it.each(statements)("%j states the locked fact", (line) => {
+    expect(checkLine(jin, "jin", line, deny, []).ok).toBe(false);
   });
 });

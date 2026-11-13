@@ -43,6 +43,20 @@ function mentions(text: string, alias: string): boolean {
   return re.test(text);
 }
 
+// "never left the car" denies the locked fact "left the car"; it does not state it.
+const NEGATION = /(?:^|\s)(?:never|not|no|nor|didn't|didnt|don't|dont|wasn't|wasnt|haven't|havent|hadn't|hadnt|won't|wont|n't)\s*$/;
+
+/** Like mentions(), but an occurrence directly after a negating word does not count as stating it. */
+function states(text: string, alias: string): boolean {
+  const a = alias.toLowerCase().replace(/[^a-z0-9':.\s-]/g, " ").trim();
+  const re = new RegExp(`(^|[^a-z0-9])${a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[^a-z0-9])`, "g");
+  for (const m of text.matchAll(re)) {
+    const before = text.slice(0, (m.index ?? 0) + m[1].length);
+    if (!NEGATION.test(before)) return true;
+  }
+  return false;
+}
+
 export interface LineCheck {
   ok: boolean;
   leaks: string[];
@@ -66,7 +80,7 @@ export function checkLine(c: CaseFile, suspectId: string, line: string, move: Mo
     if (!slot) continue;
     for (const [valueId, v] of Object.entries(slot.values)) {
       if (allowed[r.slot].includes(valueId)) continue;
-      if (v.aliases.some((a) => mentions(text, a))) leaks.push(`locked value named: ${r.slot}=${valueId}`);
+      if (v.aliases.some((a) => states(text, a))) leaks.push(`locked value named: ${r.slot}=${valueId}`);
     }
   }
   return { ok: leaks.length === 0, leaks, claims: [...move.claims] };
