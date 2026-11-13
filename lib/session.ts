@@ -65,10 +65,10 @@ const sign = (sid: string, hash: string) => createHmac("sha256", secret()).updat
 export function appendEntry(
   sid: string,
   log: LogEntry[],
-  e: { suspectId: string; question: string; evidence: string | null; line: string; claims: Claim[]; guarded: boolean; voice: string },
+  e: { suspectId: string; question: string; evidence: string | null; line: string; claims: Claim[]; guarded: boolean; brain: string; voice: string },
 ): LogEntry {
   const prev = log.length ? log[log.length - 1].hash : "genesis";
-  const base = { i: log.length, suspectId: e.suspectId, question: e.question, evidence: e.evidence, line: e.line, claims: e.claims, guarded: e.guarded, voice: e.voice, at: new Date().toISOString(), prev };
+  const base = { i: log.length, suspectId: e.suspectId, question: e.question, evidence: e.evidence, line: e.line, claims: e.claims, guarded: e.guarded, brain: e.brain, voice: e.voice, at: new Date().toISOString(), prev };
   const hash = sha256(canonical(base));
   return { ...base, hash, sig: sign(sid, hash) };
 }

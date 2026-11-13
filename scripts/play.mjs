@@ -29,7 +29,7 @@ for (const [suspectId, question, evidence] of turns) {
   log.push(r.entry);
   console.log(`\n[${suspectId}] ${question}${evidence ? `  (shows ${evidence})` : ""}`);
   console.log(`  → ${r.entry.line}`);
-  console.log(`  move=${r.move.move} claims=${JSON.stringify(r.entry.claims)} voice=${r.voice} guarded=${r.guarded} rejectedLines=${r.rejectedLines} ${r.ms}ms`);
+  console.log(`  move=${r.move.move} claims=${JSON.stringify(r.entry.claims)} brain=${r.brain} voice=${r.voice} guarded=${r.guarded} rejectedLines=${r.rejectedLines} ${r.ms}ms`);
   if (r.contradictions.length) console.log(`  contradictions: ${r.contradictions.map((c) => `${c.suspectId} ${c.slot}: said ${c.claimed}, proven ${c.proven}`).join(" | ")}`);
 }
 

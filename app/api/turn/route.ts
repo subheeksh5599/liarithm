@@ -51,10 +51,10 @@ export async function POST(req: Request) {
       lineCheck = checkLine(c, suspectId, phrased, brain.move, shown);
       if (!lineCheck.ok) throw new HttpError(502, "They hesitate. Ask again.");
       line = phrased;
-      voice = "SERV";
+      voice = brain.brain;
     }
 
-    const entry = appendEntry(sid, log, { suspectId, question, evidence, line, claims: lineCheck!.claims, guarded: brain.guarded, voice });
+    const entry = appendEntry(sid, log, { suspectId, question, evidence, line, claims: lineCheck!.claims, guarded: brain.guarded, brain: brain.brain, voice });
     const full = [...log, entry];
     const contradictions = findContradictions(c, full, shownAll(full));
 
@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       droppedClaims: moveCheck.ok ? [] : moveCheck.errors,
       rejectedLines: attempts.length,
       voice,
+      brain: brain.brain,
       contradictions,
       turnsLeft: c.turnLimit - full.length,
     });

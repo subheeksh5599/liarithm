@@ -173,7 +173,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
           <div className="suspect-list" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {c.suspects.map((s) => (
               <button key={s.id} className={`panel suspect ${s.id === active ? "active" : ""}`} onClick={() => setActive(s.id)}>
-                <img src={s.portrait} alt={s.name} />
+                <img src={s.portrait} alt={s.name} style={{ ["--face" as string]: s.face }} />
                 <span className="who">
                   <span className="caps name">{s.name}</span>
                   <span className="role">{s.role}</span>
@@ -183,7 +183,6 @@ export default function Game({ initial }: { initial: PublicCase }) {
             ))}
           </div>
           <div className="tagline-foot">
-            <img src="/art/king-small.webp" alt="" />
             <p className="caps">
               Every lie
               <br />
@@ -195,8 +194,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
         {/* ---------------------------------------------------------- room */}
         <section className="col center">
           <div className="scene">
-            {suspect.id === "kai" ? <img className="room" src="/art/scene.webp" alt="Kai in the interrogation room under a hanging lamp" /> : <img className="portrait-stage" src={suspect.portrait} alt={suspect.name} />}
-            <div className="lamp" />
+            <img className="room" src={suspect.portrait} alt={`${suspect.name} at the interrogation table`} />
             <div className="speaker">
               <span className="caps">
                 <Wave on={busy} /> {suspect.name}
@@ -234,14 +232,18 @@ export default function Game({ initial }: { initial: PublicCase }) {
                 </div>
                 <div className="msg" style={{ marginTop: 16 }}>
                   <span className="avatar">
-                    <img src={suspect.portrait} alt="" />
+                    <img src={suspect.portrait} alt="" style={{ ["--face" as string]: suspect.face }} />
                   </span>
                   <div>
                     <p className="caps who">{suspect.name}</p>
                     <div className="panel bubble">
                       {e.line}
                       {e.guarded && <span className="guard">Tried to break them. They didn&apos;t.</span>}
-                      {e.voice && <span className="voice-tag">voice · {e.voice}</span>}
+                      {e.voice && (
+                        <span className="voice-tag">
+                          decided by {e.brain ?? "SERV"} · spoken by {e.voice}
+                        </span>
+                      )}
                       <time>{clock(e.at)}</time>
                     </div>
                   </div>
@@ -400,7 +402,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
             <div className="pick">
               {c.suspects.map((s) => (
                 <button key={s.id} className={`panel ${accused === s.id ? "on" : ""}`} onClick={() => setAccused(s.id)}>
-                  <img src={s.portrait} alt="" />
+                  <img src={s.portrait} alt="" style={{ ["--face" as string]: s.face }} />
                   <span className="caps">{s.name}</span>
                 </button>
               ))}

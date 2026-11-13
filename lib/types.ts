@@ -36,9 +36,20 @@ export interface Suspect {
   id: string;
   name: string;
   role: string;
+  /** Full interrogation-room scene. The suspect card crops the face from it. */
   portrait: string;
-  /** Voice notes for the actor model: manner, rhythm, what they care about. */
+  /** CSS object-position that frames the face for the small card. */
+  face: string;
+  /** Who they are underneath: temperament and what they want out of this conversation. */
   manner: string;
+  /** How they talk: rhythm, habits, words they lean on. */
+  speech: string;
+  /** What gives them away while they are still lying. */
+  tells: string;
+  /** How they behave when the questioning gets hard but nothing is proven. */
+  pressure: string;
+  /** How they behave once evidence has broken their story. */
+  broken: string;
   /** Public background the player is told. */
   background: string;
   /** What the suspect is hiding, in their own head. Never shown to the player until the reveal. */
@@ -53,6 +64,8 @@ export interface CaseFile {
   number: string;
   title: string;
   logline: string;
+  /** Establishing shot used on the case file. */
+  cover: string | null;
   difficulty: 1 | 2 | 3;
   turnLimit: number;
   briefing: string[];
@@ -91,7 +104,9 @@ export interface LogEntry {
   claims: Claim[];
   /** True when the reasoning layer's prompt guard caught an attempt to break the suspect. */
   guarded: boolean;
-  /** Which provider spoke this line: the Dolphin network, a named fallback, or the brain itself. */
+  /** Which provider decided the move (SERV, or a named fallback when SERV could not answer). */
+  brain: string;
+  /** Which provider spoke this line: the Dolphin network, another configured voice, or the brain itself. */
   voice: string;
   at: string;
   prev: string;

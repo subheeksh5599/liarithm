@@ -31,6 +31,7 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 |---|---|---|
 | Playable web app | runs locally, not deployed | `npm run build && npm start`; menu, case files, interrogation room, accusation and reveal render |
 | Turn loop (brain → referee → voice → referee) | played end to end locally | `node scripts/play.mjs http://localhost:3417`: Kai and Jin each held their cover, broke on the right evidence, two lies proven, accusation won, fingerprint re-hash matched |
+| Brain provider | SERV first, then a labelled fallback | When SERV can't answer (out of credit, rate-limited, down), an optional `BRAIN_n` provider decides the move instead, under the same referee checks. The provider that decided each move is signed into the log and shown under the line |
 | Voice provider | bring your own | Dolphin, any OpenAI-compatible provider, or none. With no voice key, SERV phrases every line itself; this mode was also played end to end (all five turns, `voice=SERV`). The provider that spoke is signed into each line and shown under it |
 | Truth fingerprint (hash before, reveal after) | built and tested | `tests/session.test.ts` |
 | Case checker (rule audit + solvability search) | not built | nothing yet |

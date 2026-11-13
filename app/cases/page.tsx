@@ -18,11 +18,12 @@ export default function CasesPage() {
               <span>Case {c.number}</span>
               <span title={`Difficulty ${c.difficulty} of 3`}>{pieces[c.difficulty].repeat(c.difficulty)}</span>
             </div>
+            {c.cover && <img className="folder-cover" src={c.cover} alt="" />}
             <h3>{c.title}</h3>
             <p className="muted">{c.logline}</p>
             <div className="faces">
               {c.suspects.map((s) => (
-                <img key={s.id} src={s.portrait} alt={`${s.name}, ${s.role}`} />
+                <img key={s.id} src={s.portrait} alt={`${s.name}, ${s.role}`} style={{ ["--face" as string]: s.face }} />
               ))}
             </div>
             <div className="folder-meta caps">

@@ -14,11 +14,12 @@ export function publicCase(c: CaseFile) {
     number: c.number,
     title: c.title,
     logline: c.logline,
+    cover: c.cover,
     difficulty: c.difficulty,
     turnLimit: c.turnLimit,
     briefing: c.briefing,
     slots: c.slots.map((s) => ({ id: s.id, label: s.label, values: Object.fromEntries(Object.entries(s.values).map(([k, v]) => [k, v.label])) })),
-    suspects: c.suspects.map((s) => ({ id: s.id, name: s.name, role: s.role, portrait: s.portrait, background: s.background })),
+    suspects: c.suspects.map((s) => ({ id: s.id, name: s.name, role: s.role, portrait: s.portrait, face: s.face, background: s.background })),
     evidence: c.evidence.map((e) => ({ id: e.id, title: e.title, lines: e.lines, image: e.image })),
   };
 }

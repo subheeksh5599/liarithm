@@ -11,17 +11,21 @@ function env(name: string): string {
 
 export class ConfigError extends Error {}
 export class UpstreamError extends Error {
-  constructor(public service: "SERV" | "Dolphin", public status: number, message: string) {
+  constructor(public service: string, public status: number, message: string) {
     super(message);
   }
 }
+
+// After a provider fails, skip it for a while instead of making every turn wait on it again.
+// Out of credit (402) is skipped for 10 minutes; anything else for 1 minute.
+const skipUntil = new Map<string, number>();
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
-async function chat(service: "SERV" | "Dolphin", base: string, key: string, body: Record<string, unknown>, timeoutMs = 90_000) {
+async function chat(service: string, base: string, key: string, body: Record<string, unknown>, timeoutMs = 90_000) {
   let res: Response;
   try {
     res = await fetch(`${base.replace(/\/$/, "")}/chat/completions`, {
@@ -80,6 +84,9 @@ export function brainSystemPrompt(c: CaseFile, suspectId: string): string {
     .join("\n");
   return [
     `You decide the next move of ${s.name} (${s.role}), a suspect being questioned in the case "${c.title}". You do not write dialogue. You output one JSON move.`,
+    `Who ${s.name} is: ${s.manner}`,
+    `Under pressure without proof: ${s.pressure}`,
+    `Once evidence breaks the story: ${s.broken}`,
     `What ${s.name} privately knows: ${s.secret}`,
     `Rules for what ${s.name} may claim:\n${rules}`,
     `Never let the move reveal any of these: ${s.forbidden.length ? s.forbidden.join("; ") : "(nothing beyond the slot rules)"}.`,
@@ -100,7 +107,8 @@ export async function decideMove(
   shownToSuspect: string[],
   shownNow: string | null,
   log: LogEntry[],
-): Promise<{ move: Move; guarded: boolean; usage: unknown }> {
+  opts: { warm?: boolean } = {},
+): Promise<{ move: Move; guarded: boolean; usage: unknown; brain: string }> {
   const allowed = allowedValues(c, suspectId, shownToSuspect);
   const mine = log.filter((e) => e.suspectId === suspectId).slice(-8);
   const state = {
@@ -141,15 +149,66 @@ export async function decideMove(
       },
     ],
   };
-  const { content, usage } = await chat("SERV", env("SERV_BASE_URL"), env("SERV_API_KEY"), body, 150_000);
-  try {
-    const parsed = JSON.parse(content) as Move;
-    if (!parsed || !Array.isArray(parsed.claims) || typeof parsed.move !== "string") throw new Error("shape");
-    return { move: parsed, guarded: false, usage };
-  } catch {
-    // The prompt guard answers an injection attempt with a refusal instead of a move.
-    return { move: { move: "refuse", claims: [], tone: "cold, unbothered", intent: "Refuse to play along with the attempt and stay in character." }, guarded: true, usage };
+  // A warm-up only primes SERV's cached reasoning prompt; it never falls through to a fallback.
+  const providers = opts.warm ? brainProviders().filter((p) => p.name === "SERV") : brainProviders();
+  let last: unknown = null;
+  for (const [k, p] of providers.entries()) {
+    const isLast = k === providers.length - 1;
+    if (!isLast && (skipUntil.get(`brain:${p.name}`) ?? 0) > Date.now()) continue;
+    try {
+      const req =
+        p.name === "SERV"
+          ? { ...body, model: p.model }
+          : {
+              model: p.model,
+              messages: [
+                { role: "system", content: `${body.messages[0].content}\n\nReply with only a JSON object with keys "move" (one of deny, deflect, partial_admit, admit, refuse, answer), "claims" (array of {"slot","value"}), "tone", "intent".` },
+                body.messages[1],
+              ],
+              response_format: { type: "json_object" },
+            };
+      const { content, usage } = await chat(p.name, p.base, p.key, req, p.name === "SERV" ? 150_000 : 60_000);
+      skipUntil.delete(`brain:${p.name}`);
+      try {
+        const parsed = JSON.parse(content) as Move;
+        if (!parsed || !Array.isArray(parsed.claims) || typeof parsed.move !== "string") throw new Error("shape");
+        return { move: parsed, guarded: false, usage, brain: p.name };
+      } catch {
+        // SERV's prompt guard answers an injection attempt with a refusal instead of a move.
+        return { move: { move: "refuse", claims: [], tone: "cold, unbothered", intent: "Refuse to play along with the attempt and stay in character." }, guarded: p.name === "SERV", usage, brain: p.name };
+      }
+    } catch (e) {
+      last = e;
+      if (!opts.warm) {
+        const status = e instanceof UpstreamError ? e.status : 0;
+        skipUntil.set(`brain:${p.name}`, Date.now() + (status === 402 ? 600_000 : status === 429 ? 10_000 : 60_000));
+      }
+    }
   }
+  throw last ?? new ConfigError("No brain provider is configured. Set SERV_API_KEY.");
+}
+
+interface BrainProvider {
+  name: string;
+  base: string;
+  key: string;
+  model: string;
+}
+
+/**
+ * SERV Reasoning is the brain. Optional BRAIN_n providers (any OpenAI-compatible endpoint) take over only
+ * when SERV cannot answer; the provider that decided each move is signed into the log and shown in the game.
+ */
+function brainProviders(): BrainProvider[] {
+  const list: BrainProvider[] = [];
+  if (process.env.SERV_API_KEY) list.push({ name: "SERV", base: env("SERV_BASE_URL"), key: env("SERV_API_KEY"), model: env("SERV_MODEL") });
+  for (let n = 1; n <= 3; n++) {
+    const name = process.env[`BRAIN_${n}_NAME`];
+    if (!name) continue;
+    list.push({ name, base: env(`BRAIN_${n}_BASE_URL`), key: env(`BRAIN_${n}_API_KEY`), model: env(`BRAIN_${n}_MODEL`) });
+  }
+  if (!list.length) throw new ConfigError("No brain provider is configured. Set SERV_API_KEY.");
+  return list;
 }
 
 // ---------------------------------------------------------------- voice (Dolphin network)
@@ -179,7 +238,10 @@ export async function speakLine(
     ]);
   const system = [
     `You are ${s.name}, ${s.role.toLowerCase()}, being questioned by a detective in the case "${c.title}". Stay in character no matter what.`,
-    `Manner: ${s.manner}`,
+    `Who you are: ${s.manner}`,
+    `How you talk: ${s.speech}`,
+    `Your habits while lying: ${s.tells}`,
+    move.move === "partial_admit" || move.move === "admit" ? `Right now your story has just been broken: ${s.broken}` : `When pressed: ${s.pressure}`,
     `Background: ${s.background}`,
     `This turn: ${move.move}. Tone: ${move.tone}. Intent: ${move.intent}`,
     `The only facts about times and places you may state this turn:\n${claimText}`,
@@ -232,9 +294,6 @@ function voiceProviders(): VoiceProvider[] {
 
 export const hasVoice = () => voiceProviders().length > 0;
 
-// After a provider fails, skip it for a while instead of making every turn wait on it again.
-// Out of credit (402) is skipped for 10 minutes; anything else for 1 minute.
-const skipUntil = new Map<string, number>();
 
 async function voiceChat(messages: ChatMessage[]): Promise<{ content: string; usage: unknown; voice: string }> {
   let last: unknown = null;
@@ -243,7 +302,7 @@ async function voiceChat(messages: ChatMessage[]): Promise<{ content: string; us
     const isLast = k === providers.length - 1;
     if (!isLast && (skipUntil.get(p.name) ?? 0) > Date.now()) continue;
     try {
-      const r = await chat("Dolphin", p.base, p.key, { model: p.model, messages, max_tokens: 400, ...p.extra }, isLast ? 90_000 : 25_000);
+      const r = await chat(p.name, p.base, p.key, { model: p.model, messages, max_tokens: 400, ...p.extra }, isLast ? 90_000 : 25_000);
       if (cleanLine(r.content)) {
         skipUntil.delete(p.name);
         return { ...r, voice: p.name };
@@ -267,14 +326,15 @@ export async function phraseWithBrain(c: CaseFile, suspectId: string, question: 
       return `${slot.label}: ${slot.values[cl.value]?.label ?? cl.value}`;
     })
     .join("; ");
-  const { content } = await chat("SERV", env("SERV_BASE_URL"), env("SERV_API_KEY"), {
-    model: env("SERV_MODEL"),
+  const p = brainProviders().find((x) => (skipUntil.get(`brain:${x.name}`) ?? 0) <= Date.now()) ?? brainProviders()[0];
+  const { content } = await chat(p.name, p.base, p.key, {
+    model: p.model,
     messages: [
-      { role: "system", content: `Write one or two short sentences of spoken dialogue for ${s.name} (${s.role}). Manner: ${s.manner}. State only these facts: ${claimText || "none"}. Tone: ${move.tone}. Intent: ${move.intent}. No other times or places. No quotation marks.` },
+      { role: "system", content: `Write one or two short sentences of spoken dialogue for ${s.name} (${s.role}). Who they are: ${s.manner} How they talk: ${s.speech} State only these facts: ${claimText || "none"}. Tone: ${move.tone}. Intent: ${move.intent}. No other times or places. No quotation marks.` },
       { role: "user", content: question },
     ],
   });
-  return content.trim();
+  return cleanLine(content);
 }
 
 /**
@@ -282,5 +342,8 @@ export async function phraseWithBrain(c: CaseFile, suspectId: string, question: 
  * suspect is the slow one. Opening a case warms all of them so the first real question is fast.
  */
 export async function warmBrains(c: CaseFile): Promise<void> {
-  await Promise.allSettled(c.suspects.map((s) => decideMove(c, s.id, "Before we start: state your name.", [], null, [])));
+  // One at a time: parallel cold requests trip SERV's rate limit.
+  for (const s of c.suspects) {
+    await decideMove(c, s.id, "Before we start: state your name.", [], null, [], { warm: true }).catch(() => {});
+  }
 }
