@@ -34,6 +34,47 @@ describe("the truth fingerprint", () => {
   });
 });
 
+describe("the random thief", () => {
+  it("has a version for every suspect, each committing to a different truth", async () => {
+    const { blackDiamondVariants } = await import("@/lib/cases/black-diamond");
+    const culprits = blackDiamondVariants.map((v) => v.truth.culprit).sort();
+    expect(culprits).toEqual(["jin", "kai", "ren", "sora"]);
+    const commits = new Set(blackDiamondVariants.map((v) => commitment(v, "same-salt")));
+    expect(commits.size).toBe(4);
+  });
+
+  it("seals the drawn version into the session and reopens the same one", async () => {
+    const { getCase } = await import("@/lib/cases");
+    const { blackDiamondVariants } = await import("@/lib/cases/black-diamond");
+    const { token, commit } = newSession(blackDiamondVariants[2], 2);
+    const s = unseal(token);
+    const reopened = getCase(s.caseId, s.variant)!;
+    expect(reopened.truth.culprit).toBe("jin");
+    expect(commitment(reopened, s.salt)).toBe(commit);
+  });
+
+  it("every version is solvable: evidence proves a lie by the thief", async () => {
+    const { blackDiamondVariants } = await import("@/lib/cases/black-diamond");
+    for (const v of blackDiamondVariants) {
+      const thief = v.suspects.find((s) => s.id === v.truth.culprit)!;
+      const lies = thief.rules.filter((r) => r.cover !== r.truth);
+      expect(lies.length).toBeGreaterThan(0);
+      for (const r of lies) {
+        for (const evId of r.admitAfter) {
+          const ev = v.evidence.find((e) => e.id === evId)!;
+          expect(ev, `${v.truth.culprit}: ${evId}`).toBeTruthy();
+        }
+        expect(v.evidence.some((e) => e.fixes.some((f) => f.slot === r.slot && f.value === r.truth))).toBe(true);
+      }
+      // every slot value referenced exists
+      for (const s of v.suspects) for (const r of s.rules) {
+        const slot = v.slots.find((x) => x.id === r.slot)!;
+        expect(slot.values[r.cover] && slot.values[r.truth], `${s.id} ${r.slot}`).toBeTruthy();
+      }
+    }
+  });
+});
+
 describe("the testimony log", () => {
   it("accepts an untouched chain", () => {
     const a = say([], "I was at the café.");

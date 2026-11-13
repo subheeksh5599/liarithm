@@ -12,6 +12,8 @@ interface Saved {
   startedAt: string;
   log: LogEntry[];
   contras?: Contradiction[];
+  /** The version of the case this session drew (evidence differs by thief). */
+  case?: PublicCase;
 }
 
 interface Reveal {
@@ -32,8 +34,8 @@ async function sha256Hex(s: string) {
 }
 
 export default function Game({ initial }: { initial: PublicCase }) {
-  const c = initial;
   const [saved, setSaved] = useState<Saved | null>(null);
+  const c = saved?.case ?? initial;
   const [active, setActive] = useState(c.suspects[0].id);
   const [question, setQuestion] = useState("");
   const [attach, setAttach] = useState<string | null>(null);
@@ -56,7 +58,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
       setError(data.error ?? "Could not open the case.");
       return;
     }
-    const s: Saved = { token: data.token, commit: data.commit, startedAt: data.startedAt, log: [] };
+    const s: Saved = { token: data.token, commit: data.commit, startedAt: data.startedAt, log: [], case: data.case };
     localStorage.setItem(key(c.id), JSON.stringify(s));
     setSaved(s);
     setContras([]);
@@ -70,6 +72,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
     if (raw) {
       try {
         const s = JSON.parse(raw) as Saved;
+        if (!s.case) throw new Error("saved before cases were randomised");
         setSaved(s);
         setContras(s.contras ?? []);
         return;

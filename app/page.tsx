@@ -1,35 +1,51 @@
 import Link from "next/link";
 import { cases } from "@/lib/cases";
-import { Bars, Card, Folder, Info, Play } from "@/components/icons";
+import { Bars, Card } from "@/components/icons";
 
+/**
+ * The start screen. The background video already draws the PLAY and CASE FILES buttons, the logo and the
+ * tagline, so the page lays real links exactly over them (positions are % of the 1344×768 frame) and
+ * paints over the drawn buttons this game does not have.
+ */
 export default function Menu() {
   const first = cases[0];
   return (
     <main className="menu">
-      <video className="menu-video" autoPlay muted loop playsInline preload="auto" poster="/art/menu-poster.webp" aria-hidden>
-        <source src="/art/menu-bg.webm" type="video/webm" />
-        <source src="/art/menu-bg.mp4" type="video/mp4" />
-      </video>
-      <div className="menu-shade" aria-hidden />
+      <div className="stage">
+        <video className="menu-video" autoPlay muted loop playsInline preload="auto" poster="/art/menu-poster.webp" aria-hidden>
+          <source src="/art/menu-bg.webm" type="video/webm" />
+          <source src="/art/menu-bg.mp4" type="video/mp4" />
+        </video>
 
-      <h1 className="menu-title">Liarithm</h1>
-      <Link href="/how" className="menu-corner" aria-label="How it works">
-        <Info className="i18" />
-      </Link>
+        <h1 className="menu-title">Liarithm</h1>
 
-      <nav className="menu-buttons" aria-label="Main menu">
-        <Link href={`/case/${first.id}`} className="panel menu-btn primary caps">
-          <Play /> Play
-        </Link>
-        <Link href="/cases" className="panel menu-btn caps">
-          <Folder /> Case files
-        </Link>
-        <Link href="/how" className="panel menu-btn caps">
-          <Bars /> How it works
-        </Link>
-        <Link href="/studios" className="panel menu-btn caps">
-          <Card /> For studios
-        </Link>
+        {/* top-right: hide the drawn settings icon, make the drawn info icon real */}
+        <span className="patch" style={{ left: "91.8%", top: "1.6%", width: "3%", height: "5%" }} aria-hidden />
+        <Link href="/how" className="hot" style={{ left: "96.3%", top: "1.6%", width: "2.8%", height: "5%" }} aria-label="How it works" />
+
+        <nav className="stage-nav" aria-label="Main menu">
+          <Link href={`/case/${first.id}`} className="hot" style={{ left: "58.9%", top: "49.2%", width: "29.2%", height: "6.6%" }}>
+            <span className="sr">Play</span>
+          </Link>
+          <Link href="/cases" className="hot" style={{ left: "60.9%", top: "57.2%", width: "25.4%", height: "6.2%" }}>
+            <span className="sr">Case files</span>
+          </Link>
+          <Link href="/how" className="hot redraw" style={{ left: "60.9%", top: "64.1%", width: "25.4%", height: "6.2%" }}>
+            <Bars /> How it works
+          </Link>
+          <Link href="/studios" className="hot redraw" style={{ left: "60.9%", top: "71.0%", width: "25.4%", height: "6.2%" }}>
+            <Card /> For studios
+          </Link>
+          <span className="patch" style={{ left: "60.6%", top: "77.8%", width: "26%", height: "6.6%" }} aria-hidden />
+        </nav>
+      </div>
+
+      {/* small screens: the drawn menu is too small to tap, so show plain buttons under the art */}
+      <nav className="menu-mobile" aria-label="Main menu">
+        <Link href={`/case/${first.id}`} className="panel caps">Play</Link>
+        <Link href="/cases" className="panel caps">Case files</Link>
+        <Link href="/how" className="panel caps">How it works</Link>
+        <Link href="/studios" className="panel caps">For studios</Link>
       </nav>
     </main>
   );

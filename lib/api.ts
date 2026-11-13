@@ -35,7 +35,7 @@ export function openSession(token: unknown, log: unknown): { sid: string; salt: 
     if (e instanceof Error && e.message.includes("SESSION_SECRET")) throw e;
     throw new HttpError(401, "This session token is not valid. Start the case again.");
   }
-  const c = getCase(s.caseId);
+  const c = getCase(s.caseId, s.variant ?? 0);
   if (!c) throw new HttpError(404, "Case not found.");
   const entries = Array.isArray(log) ? (log as LogEntry[]) : [];
   const v = verifyLog(s.sid, entries);

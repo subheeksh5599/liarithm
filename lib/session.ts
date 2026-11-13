@@ -36,6 +36,8 @@ export function commitment(c: CaseFile, salt: string) {
 export interface Session {
   sid: string;
   caseId: string;
+  /** Which authored version of the case this session drew. Sealed, so the player cannot read it. */
+  variant: number;
   salt: string;
   startedAt: string;
 }
@@ -55,8 +57,8 @@ export function unseal(token: string): Session {
   return JSON.parse(out) as Session;
 }
 
-export function newSession(c: CaseFile): { token: string; session: Session; commit: string } {
-  const session: Session = { sid: randomBytes(9).toString("base64url"), caseId: c.id, salt: randomBytes(16).toString("hex"), startedAt: new Date().toISOString() };
+export function newSession(c: CaseFile, variant = 0): { token: string; session: Session; commit: string } {
+  const session: Session = { sid: randomBytes(9).toString("base64url"), caseId: c.id, variant, salt: randomBytes(16).toString("hex"), startedAt: new Date().toISOString() };
   return { token: seal(session), session, commit: commitment(c, session.salt) };
 }
 
