@@ -18,6 +18,9 @@ export default function Menu() {
         </video>
 
         <h1 className="menu-title">Liarithm</h1>
+        <Link href="/judges" className="judges-link caps">
+          For judges
+        </Link>
 
         {/* top-right: hide the drawn settings icon, make the drawn info icon real */}
         <span className="patch" style={{ left: "91.8%", top: "1.6%", width: "3%", height: "5%" }} aria-hidden />
@@ -39,7 +42,6 @@ export default function Menu() {
           <span className="patch" style={{ left: "60.6%", top: "77.8%", width: "26%", height: "6.6%" }} aria-hidden />
         </nav>
       </div>
-
     </main>
   );
 }

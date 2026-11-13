@@ -11,6 +11,7 @@ export function PageTop() {
         <Link href="/cases">Cases</Link>
         <Link href="/how">How it works</Link>
         <Link href="/studios">Studios</Link>
+        <Link href="/judges">For judges</Link>
       </nav>
     </header>
   );
