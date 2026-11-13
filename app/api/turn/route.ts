@@ -4,7 +4,7 @@ import { decideMove, phraseWithBrain, speakLine } from "@/lib/models";
 import { checkLine, checkMove, findContradictions } from "@/lib/referee";
 import { appendEntry } from "@/lib/session";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   try {
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     // 2. Voice speaks it; 3. referee checks the line. Two retries, then the brain phrases it.
     const attempts: { line: string; leaks: string[] }[] = [];
     let line = "";
-    let source: "voice" | "brain" = "voice";
+    let voice = "";
     let lineCheck = null;
     for (let k = 0; k < 3; k++) {
       const note = attempts.length ? attempts[attempts.length - 1].leaks.join("; ") : null;
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       lineCheck = checkLine(c, suspectId, spoken.line, brain.move, shown);
       if (lineCheck.ok && spoken.line) {
         line = spoken.line;
+        voice = spoken.voice;
         break;
       }
       attempts.push({ line: spoken.line, leaks: lineCheck.leaks.length ? lineCheck.leaks : ["empty line"] });
@@ -50,10 +51,10 @@ export async function POST(req: Request) {
       lineCheck = checkLine(c, suspectId, phrased, brain.move, shown);
       if (!lineCheck.ok) throw new HttpError(502, "They hesitate. Ask again.");
       line = phrased;
-      source = "brain";
+      voice = "SERV (rephrased)";
     }
 
-    const entry = appendEntry(sid, log, { suspectId, question, evidence, line, claims: lineCheck!.claims, guarded: brain.guarded });
+    const entry = appendEntry(sid, log, { suspectId, question, evidence, line, claims: lineCheck!.claims, guarded: brain.guarded, voice });
     const full = [...log, entry];
     const contradictions = findContradictions(c, full, shownAll(full));
 
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
       guarded: brain.guarded,
       droppedClaims: moveCheck.ok ? [] : moveCheck.errors,
       rejectedLines: attempts.length,
-      source,
+      voice,
       contradictions,
       turnsLeft: c.turnLimit - full.length,
     });

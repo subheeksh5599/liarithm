@@ -93,6 +93,8 @@ export interface LogEntry {
   claims: Claim[];
   /** True when the reasoning layer's prompt guard caught an attempt to break the suspect. */
   guarded: boolean;
+  /** Which provider spoke this line: the Dolphin network, a named fallback, or the brain itself. */
+  voice: string;
   at: string;
   prev: string;
   hash: string;

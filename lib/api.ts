@@ -16,7 +16,8 @@ export function fail(err: unknown) {
   if (err instanceof HttpError) return NextResponse.json({ error: err.message }, { status: err.status });
   if (err instanceof ConfigError) return NextResponse.json({ error: err.message, kind: "config" }, { status: 503 });
   if (err instanceof UpstreamError) {
-    const hint = err.status === 402 ? `${err.service} has no credit left.` : err.status === 429 ? `${err.service} is rate-limiting; ask again in a moment.` : `${err.service} did not answer.`;
+    const hint =
+      err.status === 402 ? `${err.service} has no credit left.` : err.status === 429 ? `${err.service} is rate-limiting; ask again in a moment.` : err.status === 504 ? "They're taking their time to answer. Ask again." : `${err.service} did not answer.`;
     return NextResponse.json({ error: hint, detail: err.message, kind: "upstream" }, { status: 502 });
   }
   const msg = err instanceof Error ? err.message : String(err);

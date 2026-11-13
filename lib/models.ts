@@ -21,13 +21,19 @@ interface ChatMessage {
   content: string;
 }
 
-async function chat(service: "SERV" | "Dolphin", base: string, key: string, body: Record<string, unknown>) {
-  const res = await fetch(`${base.replace(/\/$/, "")}/chat/completions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(90_000),
-  });
+async function chat(service: "SERV" | "Dolphin", base: string, key: string, body: Record<string, unknown>, timeoutMs = 90_000) {
+  let res: Response;
+  try {
+    res = await fetch(`${base.replace(/\/$/, "")}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (e) {
+    const timedOut = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+    throw new UpstreamError(service, timedOut ? 504 : 503, `${service} ${timedOut ? "timed out" : "could not be reached"}: ${e instanceof Error ? e.message : e}`);
+  }
   const text = await res.text();
   if (!res.ok) throw new UpstreamError(service, res.status, `${service} returned ${res.status}: ${text.slice(0, 300)}`);
   const data = JSON.parse(text);
@@ -135,7 +141,7 @@ export async function decideMove(
       },
     ],
   };
-  const { content, usage } = await chat("SERV", env("SERV_BASE_URL"), env("SERV_API_KEY"), body);
+  const { content, usage } = await chat("SERV", env("SERV_BASE_URL"), env("SERV_API_KEY"), body, 150_000);
   try {
     const parsed = JSON.parse(content) as Move;
     if (!parsed || !Array.isArray(parsed.claims) || typeof parsed.move !== "string") throw new Error("shape");
@@ -155,7 +161,7 @@ export async function speakLine(
   move: Move,
   log: LogEntry[],
   retryNote: string | null,
-): Promise<{ line: string; usage: unknown }> {
+): Promise<{ line: string; usage: unknown; voice: string }> {
   const s = c.suspects.find((x) => x.id === suspectId)!;
   const claimText = move.claims.length
     ? move.claims
@@ -182,13 +188,67 @@ export async function speakLine(
   ]
     .filter(Boolean)
     .join("\n\n");
-  const { content, usage } = await chat("Dolphin", env("DOLPHIN_BASE_URL"), env("DOLPHIN_API_KEY"), {
-    model: env("DOLPHIN_MODEL"),
-    messages: [{ role: "system", content: system }, ...history, { role: "user", content: question }],
-    max_tokens: 400,
-    reasoning_effort: "low",
-  });
-  return { line: content.replace(/^["“]|["”]$/g, "").trim(), usage };
+  const messages = [{ role: "system" as const, content: system }, ...history, { role: "user" as const, content: question }];
+  const { content, usage, voice } = await voiceChat(messages);
+  return { line: cleanLine(content), usage, voice };
+}
+
+const cleanLine = (s: string) =>
+  s
+    .replace(/<think>[\s\S]*?<\/think>/g, "")
+    .trim()
+    .replace(/^["“]|["”]$/g, "")
+    .trim();
+
+/**
+ * The voice runs on the Dolphin network. When Dolphin cannot answer (no credit, rate limit, outage),
+ * the line is spoken by the next configured fallback provider instead, and the provider that actually
+ * spoke is recorded on the signed testimony entry and shown under the line.
+ */
+interface VoiceProvider {
+  name: string;
+  base: string;
+  key: string;
+  model: string;
+  extra: Record<string, unknown>;
+}
+
+function voiceProviders(): VoiceProvider[] {
+  const list: VoiceProvider[] = [
+    { name: "Dolphin", base: env("DOLPHIN_BASE_URL"), key: env("DOLPHIN_API_KEY"), model: env("DOLPHIN_MODEL"), extra: { reasoning_effort: "low" } },
+  ];
+  for (const n of [1, 2]) {
+    const name = process.env[`VOICE_FALLBACK_${n}_NAME`];
+    if (!name) continue;
+    list.push({ name, base: env(`VOICE_FALLBACK_${n}_BASE_URL`), key: env(`VOICE_FALLBACK_${n}_API_KEY`), model: env(`VOICE_FALLBACK_${n}_MODEL`), extra: {} });
+  }
+  return list;
+}
+
+// After a provider fails, skip it for a while instead of making every turn wait on it again.
+// Out of credit (402) is skipped for 10 minutes; anything else for 1 minute.
+const skipUntil = new Map<string, number>();
+
+async function voiceChat(messages: ChatMessage[]): Promise<{ content: string; usage: unknown; voice: string }> {
+  let last: unknown = null;
+  const providers = voiceProviders();
+  for (const [k, p] of providers.entries()) {
+    const isLast = k === providers.length - 1;
+    if (!isLast && (skipUntil.get(p.name) ?? 0) > Date.now()) continue;
+    try {
+      const r = await chat("Dolphin", p.base, p.key, { model: p.model, messages, max_tokens: 400, ...p.extra }, isLast ? 90_000 : 25_000);
+      if (cleanLine(r.content)) {
+        skipUntil.delete(p.name);
+        return { ...r, voice: p.name };
+      }
+      last = new UpstreamError("Dolphin", 502, `${p.name} returned an empty line`);
+      skipUntil.set(p.name, Date.now() + 60_000);
+    } catch (e) {
+      last = e;
+      skipUntil.set(p.name, Date.now() + (e instanceof UpstreamError && e.status === 402 ? 600_000 : 60_000));
+    }
+  }
+  throw last ?? new UpstreamError("Dolphin", 502, "No voice provider answered.");
 }
 
 /** Last resort when the voice keeps leaking: SERV phrases the already-checked move itself. */
@@ -208,4 +268,12 @@ export async function phraseWithBrain(c: CaseFile, suspectId: string, question: 
     ],
   });
   return content.trim();
+}
+
+/**
+ * SERV generates and caches a reasoning prompt per distinct system prompt; the first call for each
+ * suspect is the slow one. Opening a case warms all of them so the first real question is fast.
+ */
+export async function warmBrains(c: CaseFile): Promise<void> {
+  await Promise.allSettled(c.suspects.map((s) => decideMove(c, s.id, "Before we start: state your name.", [], null, [])));
 }

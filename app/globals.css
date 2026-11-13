@@ -1053,3 +1053,12 @@ pre.code {
   width: 20px;
   height: 20px;
 }
+
+.voice-tag {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-top: 8px;
+}

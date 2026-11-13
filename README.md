@@ -17,7 +17,7 @@
 
 </div>
 
-**Status: building.** The web app, the referee, the truth fingerprint and the signed testimony log run locally and are covered by 25 tests. The two model calls are wired but have not yet been run against live keys, and the app is not deployed. Every row below says which.
+**Status: building.** The web app, the referee, the truth fingerprint and the signed testimony log run locally and are covered by 25 tests. A full case has been played end to end against the live models. The app is not deployed yet. Every row below says which.
 
 Liarithm (liar + algorithm) puts you in a room with suspects who have something to hide. They answer in their own voice, they bend the truth, and they hold their story under pressure. You win by showing the one piece of evidence that breaks it. Two things make that possible. A reasoning layer decides, turn by turn, what each suspect is allowed to admit, so they never confess by accident and never contradict themselves at random. And before your first question the game publishes a fingerprint of the hidden truth, so at the end you can check for yourself that the killer was never changed behind your back.
 
@@ -30,7 +30,8 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 | Surface | Status | The evidence |
 |---|---|---|
 | Playable web app | runs locally, not deployed | `npm run build && npm start`; menu, case files, interrogation room, accusation and reveal render |
-| Turn loop (brain → referee → voice → referee) | wired, not yet run with live keys | `app/api/turn/route.ts`; without keys it answers with the missing setting by name |
+| Turn loop (brain → referee → voice → referee) | played end to end locally | `node scripts/play.mjs http://localhost:3417`: Kai and Jin each held their cover, broke on the right evidence, two lies proven, accusation won, fingerprint re-hash matched |
+| Voice provider | Dolphin first, then a labelled fallback | Dolphin answered `402 insufficient credits` during these runs, so lines were spoken by the fallback (Groq, `qwen/qwen3.8-27b`). The provider that spoke is signed into each testimony entry and shown under the line |
 | Truth fingerprint (hash before, reveal after) | built and tested | `tests/session.test.ts` |
 | Case checker (rule audit + solvability search) | not built | nothing yet |
 | Leak benchmark (voice alone vs brain + voice) | not run | nothing yet; this is the day-one kill check |
@@ -168,13 +169,13 @@ Estimates for one full case of about 40 turns, from the published per-token pric
 | Case file format | ✓ | | |
 | Referee rules | ✓ | | |
 | Truth fingerprint | ✓ | | |
-| Brain + voice turn loop | | ✓ wired, not yet run with live keys | |
+| Brain + voice turn loop | | ✓ played end to end locally; voice came from the fallback while Dolphin had no credit | |
 | Leak benchmark | | | ✓ |
 | Case checker | | | ✓ |
 | Playable web app | | ✓ runs locally, not deployed | |
 | Creator marketplace | | | ✓ not in the first build |
 | Engine sold to studios | | | ✓ not in the first build |
-| `-serv-kronos-multipath` on `gpt-6-luna` | | | ✓ the docs show the suffix on `gpt-5.4-mini`; support on `gpt-6-luna` is checked on day one |
+| `-serv-kronos-multipath` on `gpt-6-luna` | ✓ accepted by the endpoint | | |
 
 ## Attack → test
 
