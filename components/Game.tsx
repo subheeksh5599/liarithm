@@ -241,7 +241,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
                     <div className="panel bubble">
                       {e.line}
                       {e.guarded && <span className="guard">Tried to break them. They didn&apos;t.</span>}
-                      {e.voice && e.voice !== "Dolphin" && <span className="voice-tag">voice · {e.voice} (Dolphin unavailable)</span>}
+                      {e.voice && <span className="voice-tag">voice · {e.voice}</span>}
                       <time>{clock(e.at)}</time>
                     </div>
                   </div>

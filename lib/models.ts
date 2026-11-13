@@ -213,17 +213,24 @@ interface VoiceProvider {
   extra: Record<string, unknown>;
 }
 
+/**
+ * Voice providers come entirely from whoever runs the app. Configure Dolphin, any number of other
+ * OpenAI-compatible providers, or none at all: with no voice configured, SERV phrases every line itself.
+ */
 function voiceProviders(): VoiceProvider[] {
-  const list: VoiceProvider[] = [
-    { name: "Dolphin", base: env("DOLPHIN_BASE_URL"), key: env("DOLPHIN_API_KEY"), model: env("DOLPHIN_MODEL"), extra: { reasoning_effort: "low" } },
-  ];
-  for (const n of [1, 2]) {
-    const name = process.env[`VOICE_FALLBACK_${n}_NAME`];
+  const list: VoiceProvider[] = [];
+  if (process.env.DOLPHIN_API_KEY) {
+    list.push({ name: "Dolphin", base: env("DOLPHIN_BASE_URL"), key: env("DOLPHIN_API_KEY"), model: env("DOLPHIN_MODEL"), extra: { reasoning_effort: "low" } });
+  }
+  for (let n = 1; n <= 5; n++) {
+    const name = process.env[`VOICE_${n}_NAME`];
     if (!name) continue;
-    list.push({ name, base: env(`VOICE_FALLBACK_${n}_BASE_URL`), key: env(`VOICE_FALLBACK_${n}_API_KEY`), model: env(`VOICE_FALLBACK_${n}_MODEL`), extra: {} });
+    list.push({ name, base: env(`VOICE_${n}_BASE_URL`), key: env(`VOICE_${n}_API_KEY`), model: env(`VOICE_${n}_MODEL`), extra: {} });
   }
   return list;
 }
+
+export const hasVoice = () => voiceProviders().length > 0;
 
 // After a provider fails, skip it for a while instead of making every turn wait on it again.
 // Out of credit (402) is skipped for 10 minutes; anything else for 1 minute.

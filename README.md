@@ -31,7 +31,7 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 |---|---|---|
 | Playable web app | runs locally, not deployed | `npm run build && npm start`; menu, case files, interrogation room, accusation and reveal render |
 | Turn loop (brain → referee → voice → referee) | played end to end locally | `node scripts/play.mjs http://localhost:3417`: Kai and Jin each held their cover, broke on the right evidence, two lies proven, accusation won, fingerprint re-hash matched |
-| Voice provider | Dolphin first, then a labelled fallback | Dolphin answered `402 insufficient credits` during these runs, so lines were spoken by the fallback (Groq, `qwen/qwen3.8-27b`). The provider that spoke is signed into each testimony entry and shown under the line |
+| Voice provider | bring your own | Dolphin, any OpenAI-compatible provider, or none. With no voice key, SERV phrases every line itself; this mode was also played end to end (all five turns, `voice=SERV`). The provider that spoke is signed into each line and shown under it |
 | Truth fingerprint (hash before, reveal after) | built and tested | `tests/session.test.ts` |
 | Case checker (rule audit + solvability search) | not built | nothing yet |
 | Leak benchmark (voice alone vs brain + voice) | not run | nothing yet; this is the day-one kill check |
@@ -83,6 +83,7 @@ Catching a lie is arithmetic, not opinion. Evidence fixes the value of a slot ("
 - [What's real vs pending — the honesty table](#whats-real-vs-pending--the-honesty-table)
 - [Attack → test](#attack--test)
 - [Build plan](#build-plan)
+- [Run it yourself](#run-it-yourself)
 - [Tech stack](#tech-stack)
 - [License](#license)
 
@@ -169,7 +170,7 @@ Estimates for one full case of about 40 turns, from the published per-token pric
 | Case file format | ✓ | | |
 | Referee rules | ✓ | | |
 | Truth fingerprint | ✓ | | |
-| Brain + voice turn loop | | ✓ played end to end locally; voice came from the fallback while Dolphin had no credit | |
+| Brain + voice turn loop | | ✓ played end to end locally, with an external voice and with SERV alone | |
 | Leak benchmark | | | ✓ |
 | Case checker | | | ✓ |
 | Playable web app | | ✓ runs locally, not deployed | |
@@ -195,6 +196,28 @@ Estimates for one full case of about 40 turns, from the published per-token pric
 2. Case file format, referee, fingerprint, one complete case.
 3. Full turn loop with retries and failure paths, case checker, game UI (questioning, evidence board, accusation, fingerprint check).
 4. Two more cases, the 50-question benchmark with its run log, deploy, this README moved from design stage to measured results.
+
+## Run it yourself
+
+Liarithm runs on your own keys. SERV Reasoning is the only required service; the voice is optional.
+
+```bash
+git clone https://github.com/subheeksh5599/liarithm && cd liarithm
+npm install
+cp .env.example .env.local   # then fill it in
+npm run build && npm start   # http://localhost:3000
+```
+
+| Setting | Required | What it does |
+|---|---|---|
+| `SESSION_SECRET` | yes | Seals sessions and signs the testimony log (32+ random characters, e.g. `openssl rand -hex 32`) |
+| `SERV_BASE_URL`, `SERV_API_KEY`, `SERV_MODEL` | yes | The brain: decides what each suspect may admit |
+| `DOLPHIN_BASE_URL`, `DOLPHIN_API_KEY`, `DOLPHIN_MODEL` | no | Voice on the Dolphin network, tried first when its key is set |
+| `VOICE_1_*` … `VOICE_5_*` | no | Any other OpenAI-compatible voice, tried in order |
+
+With no voice configured, SERV phrases the lines itself under the same referee checks. Each line in the game shows which provider spoke it.
+
+Check a running server plays a full case: `node scripts/play.mjs http://localhost:3000`. Check the brain alone: `npx tsx --env-file=.env.local scripts/brain-probe.ts`.
 
 ## Tech stack
 

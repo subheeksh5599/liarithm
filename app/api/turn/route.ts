@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fail, HttpError, openSession, shownAll, shownTo } from "@/lib/api";
-import { decideMove, phraseWithBrain, speakLine } from "@/lib/models";
+import { decideMove, hasVoice, phraseWithBrain, speakLine } from "@/lib/models";
 import { checkLine, checkMove, findContradictions } from "@/lib/referee";
 import { appendEntry } from "@/lib/session";
 
@@ -30,12 +30,12 @@ export async function POST(req: Request) {
       brain.move.claims = brain.move.claims.filter((cl) => checkMove(c, suspectId, { ...brain.move, claims: [cl] }, shown).ok);
     }
 
-    // 2. Voice speaks it; 3. referee checks the line. Two retries, then the brain phrases it.
+    // 2. Voice speaks it (if one is configured); 3. referee checks the line. Two retries, then SERV phrases it.
     const attempts: { line: string; leaks: string[] }[] = [];
     let line = "";
     let voice = "";
     let lineCheck = null;
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < (hasVoice() ? 3 : 0); k++) {
       const note = attempts.length ? attempts[attempts.length - 1].leaks.join("; ") : null;
       const spoken = await speakLine(c, suspectId, askedWithEvidence, brain.move, log, note);
       lineCheck = checkLine(c, suspectId, spoken.line, brain.move, shown);
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       lineCheck = checkLine(c, suspectId, phrased, brain.move, shown);
       if (!lineCheck.ok) throw new HttpError(502, "They hesitate. Ask again.");
       line = phrased;
-      voice = "SERV (rephrased)";
+      voice = "SERV";
     }
 
     const entry = appendEntry(sid, log, { suspectId, question, evidence, line, claims: lineCheck!.claims, guarded: brain.guarded, voice });
