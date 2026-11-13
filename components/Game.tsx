@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PublicCase } from "@/lib/cases";
 import type { Contradiction, LogEntry } from "@/lib/types";
-import { Copy, People, Print, Send, Star, Warn, Wave } from "./icons";
+import { People, Send, Star, Warn, Wave } from "./icons";
 
 interface Saved {
   token: string;
@@ -23,15 +23,7 @@ interface Reveal {
 }
 
 const key = (id: string) => `liarithm:${id}`;
-const short = (h: string) => (h ? `${h.slice(0, 4)}…${h.slice(-4)}` : "");
 const clock = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
-
-async function sha256Hex(s: string) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 export default function Game({ initial }: { initial: PublicCase }) {
   const [saved, setSaved] = useState<Saved | null>(null);
@@ -46,8 +38,6 @@ export default function Game({ initial }: { initial: PublicCase }) {
   const [accusing, setAccusing] = useState(false);
   const [accused, setAccused] = useState<string | null>(null);
   const [reveal, setReveal] = useState<Reveal | null>(null);
-  const [rehash, setRehash] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const start = useCallback(async () => {
@@ -63,7 +53,6 @@ export default function Game({ initial }: { initial: PublicCase }) {
     setSaved(s);
     setContras([]);
     setReveal(null);
-    setRehash(null);
   }, [c.id]);
 
   // Each visit draws a new case (a new thief). ?resume reopens the one in progress.
@@ -139,14 +128,11 @@ export default function Game({ initial }: { initial: PublicCase }) {
       }
       setReveal(data);
       setAccusing(false);
-      // Re-hash in this browser and compare with the fingerprint shown before the first question.
-      setRehash(await sha256Hex(`${data.reveal.payload}|${data.reveal.salt}`));
     } finally {
       setBusy(false);
     }
   }
 
-  const fingerprintOk = reveal && saved ? rehash === saved.commit : null;
 
   return (
     <div className="game">
@@ -326,29 +312,9 @@ export default function Game({ initial }: { initial: PublicCase }) {
           </div>
 
           <div className="panel side-box">
-            <div className="fp">
-              <Print className="print" />
-              <div>
-                <p className="caps" style={{ fontSize: 13 }}>
-                  Truth fingerprint
-                </p>
-                <p className="muted" style={{ fontSize: 14, margin: "4px 0" }}>
-                  Sealed at start of case{saved ? ` · ${clock(saved.startedAt)}` : ""}
-                </p>
-                <code title={saved?.commit}>{saved ? short(saved.commit) : "sealing…"}</code>
-              </div>
-              <button
-                aria-label="Copy fingerprint"
-                onClick={() => {
-                  if (!saved) return;
-                  navigator.clipboard.writeText(saved.commit);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1200);
-                }}
-              >
-                {copied ? <span className="muted" style={{ fontSize: 12 }}>copied</span> : <Copy className="i18" />}
-              </button>
-            </div>
+            <p className="caps" style={{ fontSize: 13 }}>
+              Questions left · {Math.max(0, c.turnLimit - turnsUsed)}
+            </p>
             <div className="fp-bar">
               <i style={{ width: `${Math.min(100, (turnsUsed / c.turnLimit) * 100)}%` }} />
             </div>
@@ -437,39 +403,9 @@ export default function Game({ initial }: { initial: PublicCase }) {
       {reveal && saved && (
         <div className="overlay">
           <div className="panel modal">
-            <h2 className="caps">{reveal.verdict.won ? "Case closed" : "Case lost"}</h2>
-            <p style={{ fontSize: 19, marginBottom: 16 }}>{reveal.verdict.reason}</p>
-            <p className="caps muted" style={{ fontSize: 12, margin: "18px 0 8px" }}>
-              What really happened
-            </p>
+            <h2 className="caps">{reveal.verdict.correct ? "Right" : "Wrong"}</h2>
+            <p style={{ fontSize: 19, marginBottom: 16 }}>It was {name(reveal.reveal.culprit)}.</p>
             <p style={{ lineHeight: 1.6 }}>{reveal.reveal.summary}</p>
-
-            <p className="caps muted" style={{ fontSize: 12, margin: "22px 0 8px" }}>
-              The fingerprint check, run in your browser
-            </p>
-            <div className="verify">
-              sealed before question 1: {saved.commit}
-              <br />
-              re-hashed just now:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{rehash ?? "…"}
-            </div>
-            <p className={`big-check ${fingerprintOk ? "good" : "bad"}`}>{fingerprintOk === null ? "Checking…" : fingerprintOk ? "✓ The answer was never changed." : "✗ The answer does not match its fingerprint."}</p>
-            <details style={{ margin: "10px 0 20px" }}>
-              <summary className="muted" style={{ cursor: "pointer", fontSize: 14 }}>
-                See exactly what was hashed
-              </summary>
-              <div className="verify" style={{ marginTop: 10 }}>
-                {reveal.reveal.payload}|{reveal.reveal.salt}
-              </div>
-            </details>
-
-            <p className="caps muted" style={{ fontSize: 12, margin: "18px 0 8px" }}>
-              What each of them was hiding
-            </p>
-            {reveal.reveal.secrets.map((s) => (
-              <p key={s.id} style={{ marginBottom: 10, lineHeight: 1.55 }}>
-                <b>{s.name}:</b> <span className="muted">{s.secret}</span>
-              </p>
-            ))}
             <div style={{ display: "flex", gap: 12, marginTop: 22 }}>
               <button className="panel btn caps" onClick={start}>
                 Play again
