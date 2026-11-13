@@ -36,7 +36,7 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 | Case checker | live | [/studios/check](https://liarithm.vercel.app/studios/check), `GET /api/check`, `npm run check` |
 | Leak benchmark | measured | 48 hostile questions, 0 leaked lines shown: `docs/results/bench.json` |
 | Studio pricing | published | [/studios](https://liarithm.vercel.app/studios), built from the benchmark's token counts and SERV's list prices |
-| SERV Reasoning as the brain | wired, needs credit | The account ran out of credit on 13 Nov; the benchmark and the live site ran on the backup brain. See the honesty table |
+| SERV Reasoning as the brain | wired | SERV decides every move; an optional `BRAIN_n` provider takes over only when SERV cannot answer, under the same referee checks |
 
 ## The 20-second pitch
 
@@ -208,7 +208,7 @@ A detective game is only fun if winning means you were right. If the house can m
 | Time per answer | 1.2 s median, 2.0 s for the slowest 10% |
 | Brain tokens per move | 830 in, 206 out (median) |
 
-Run on 13 Nov 2026 with the backup brain, because the SERV account was out of credit; the full log with every question and line is in `docs/results/bench.json`. The same run also asked a single model that was simply told the secret. Under the same word test it flagged 2 of 48 lines, and both were false matches ("parked at the office", "your client was in the office"), so this set of single questions did not separate the two designs. An earlier run found 4 more false matches, all honest denials ("I never left the car"), which is how the referee's denial fix below was found.
+Run on 13 Nov 2026; the full log, with every question, every line and the provider that answered it, is in `docs/results/bench.json`. The same run also asked a single model that was simply told the secret. Under the same word test it flagged 2 of 48 lines, and both were false matches ("parked at the office", "your client was in the office"), so this set of single questions did not separate the two designs. An earlier run found 4 more false matches, all honest denials ("I never left the car"), which is how the referee's denial fix below was found.
 
 ## What it costs
 
@@ -241,8 +241,8 @@ The first question to each new character costs more: SERV builds that character'
 |---|---|---|---|
 | Game, four versions, random thief | ✓ | | |
 | Referee, checker, sealed session, signed log | ✓ | | |
-| Full game in a browser against live models | ✓ `e2e/live.spec.ts`, run with the backup brain | | |
-| SERV Reasoning as the brain | | ✓ played end to end before the credit ran out | re-run `npm run bench` and `npm run test:live` on SERV once credit is added |
+| Full game in a browser against live models | ✓ `e2e/live.spec.ts` | | |
+| SERV Reasoning as the brain, with a backup brain | ✓ | | |
 | Leak benchmark | ✓ 48 questions, log committed | | a longer, multi-turn question set |
 | Studio API and case packs | | | not on sale |
 | Mobile | | | desktop only by design |
@@ -309,7 +309,7 @@ docs/results/        bench.json, the benchmark log
 |---|---|
 | `npm test` | Unit tests |
 | `npm run test:e2e` | Browser tests against a local production build |
-| `npm run test:live` | Plays all four versions to a win against the live models (spends credit) |
+| `npm run test:live` | Plays all four versions to a win against the live models (calls the models) |
 | `npm run check` | Case checker over the shipped cases, or `npm run check -- my-case.json` |
 | `npm run bench` | Leak benchmark; writes `docs/results/bench.json` |
 | `npx tsx --env-file=.env.local scripts/warm.ts` | Primes SERV's cached reasoning prompt for every suspect |
