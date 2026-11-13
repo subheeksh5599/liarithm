@@ -1,6 +1,8 @@
 <div align="center">
 
-# USOGUI
+<img src="docs/media/header.webp" alt="Liarithm: a figure in black and white reaching out over a chessboard, surrounded by playing cards, dice and suspect portraits" width="100%">
+
+# LIARITHM
 
 ### A detective game where suspects really lie, and you win by catching them with evidence.
 
@@ -17,7 +19,7 @@
 
 **Status: design stage. Nothing in this repository runs yet.** This README, [`docs/PITCH.md`](docs/PITCH.md) and [`docs/EVIDENCE.md`](docs/EVIDENCE.md) describe what is being built and why. Every row below that needs code says so.
 
-Usogui (嘘喰い, "lie eater") puts you in a room with suspects who have something to hide. They answer in their own voice, they bend the truth, and they hold their story under pressure. You win by showing the one piece of evidence that breaks it. Two things make that possible. A reasoning layer decides, turn by turn, what each suspect is allowed to admit, so they never confess by accident and never contradict themselves at random. And before your first question the game publishes a fingerprint of the hidden truth, so at the end you can check for yourself that the killer was never changed behind your back.
+Liarithm (liar + algorithm) puts you in a room with suspects who have something to hide. They answer in their own voice, they bend the truth, and they hold their story under pressure. You win by showing the one piece of evidence that breaks it. Two things make that possible. A reasoning layer decides, turn by turn, what each suspect is allowed to admit, so they never confess by accident and never contradict themselves at random. And before your first question the game publishes a fingerprint of the hidden truth, so at the end you can check for yourself that the killer was never changed behind your back.
 
 ```
 SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
@@ -38,7 +40,7 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 
 AI characters break mysteries in three ways: they confess the moment you lean on them, they contradict themselves for no reason, or they refuse to play a real villain. Players also have no way to know the game didn't simply move the answer.
 
-Usogui splits every suspect into a **brain** and a **voice**, with plain code in between:
+Liarithm splits every suspect into a **brain** and a **voice**, with plain code in between:
 
 ```
 your question
@@ -69,7 +71,7 @@ Catching a lie is arithmetic, not opinion. Evidence fixes the value of a slot ("
 
 - [Live status](#live-status)
 - [The 20-second pitch](#the-20-second-pitch)
-- [What Usogui is NOT](#what-usogui-is-not)
+- [What Liarithm is NOT](#what-liarithm-is-not)
 - [The problem I set out to solve](#the-problem-i-set-out-to-solve)
 - [What I'm building](#what-im-building)
 - [Architecture](#architecture)
@@ -83,9 +85,9 @@ Catching a lie is arithmetic, not opinion. Evidence fixes the value of a slot ("
 - [Tech stack](#tech-stack)
 - [License](#license)
 
-## What Usogui is NOT
+## What Liarithm is NOT
 
-- **Not the first AI detective game.** Many exist, including ones with a deterministic truth engine and one that calls itself provably fair. Usogui claims only the combination: a per-turn lie policy enforced by a reasoning layer, a referee that decides contradictions by comparison, and a truth fingerprint the player re-checks in their own browser.
+- **Not the first AI detective game.** Many exist, including ones with a deterministic truth engine and one that calls itself provably fair. Liarithm claims only the combination: a per-turn lie policy enforced by a reasoning layer, a referee that decides contradictions by comparison, and a truth fingerprint the player re-checks in their own browser.
 - **Not a chatbot with a costume.** The voice model never decides what a suspect reveals. It only phrases a move that was already decided and checked.
 - **Not a model judging whether you caught a lie.** That verdict is a slot comparison in code.
 - **Not a promise that nothing leaks.** Leak rate is measured on a fixed adversarial question set and published, with the run log.

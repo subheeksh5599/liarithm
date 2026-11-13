@@ -33,9 +33,9 @@ Every figure and quote the README and pitch rely on, with where it came from. Al
 
 ## Neighbours (existing AI detective games)
 
-Public repositories found on GitHub on 13 November 2026. They show the category is established; the README's "What Usogui is NOT" section is written against them.
+Public repositories found on GitHub on 13 November 2026. They show the category is established; the README's "What Liarithm is NOT" section is written against them.
 
-| Repository | What it does | What Usogui adds |
+| Repository | What it does | What Liarithm adds |
 |---|---|---|
 | https://github.com/taujeszky/Skiron | "Murder mysteries that are provably fair: a pure-TypeScript deduction engine certifies every case twice" | a per-turn lie policy enforced by a reasoning layer, and a truth hash the player re-checks |
 | https://github.com/Koe10121/CASEFILE | "LLM-driven suspects, a deterministic truth engine, and an eval harness" | the brain/voice split with a referee on both sides |
