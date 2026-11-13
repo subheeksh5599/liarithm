@@ -18,7 +18,7 @@ export function publicCase(c: CaseFile) {
     turnLimit: c.turnLimit,
     briefing: c.briefing,
     slots: c.slots.map((s) => ({ id: s.id, label: s.label, values: Object.fromEntries(Object.entries(s.values).map(([k, v]) => [k, v.label])) })),
-    suspects: c.suspects.map((s) => ({ id: s.id, name: s.name, role: s.role, portrait: s.portrait, background: s.background, prompts: s.prompts })),
+    suspects: c.suspects.map((s) => ({ id: s.id, name: s.name, role: s.role, portrait: s.portrait, background: s.background })),
     evidence: c.evidence.map((e) => ({ id: e.id, title: e.title, lines: e.lines, image: e.image })),
   };
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PublicCase } from "@/lib/cases";
 import type { Contradiction, LogEntry } from "@/lib/types";
-import { Arrow, Copy, Doc, People, Print, Search, Send, Star, Warn, Wave } from "./icons";
+import { Copy, People, Print, Send, Star, Warn, Wave } from "./icons";
 
 interface Saved {
   token: string;
@@ -258,25 +258,6 @@ export default function Game({ initial }: { initial: PublicCase }) {
           {error && <p className="notice err">{error}</p>}
           {!reveal && turnsUsed >= c.turnLimit && <p className="notice">No questions left. Make your accusation.</p>}
 
-          <div className="chips">
-            <button className="panel chip" disabled={busy || !saved} onClick={() => ask(suspect.prompts[0])}>
-              <Search />
-              {suspect.prompts[0]}
-            </button>
-            <button className="panel chip" disabled={busy || !saved} onClick={() => ask(suspect.prompts[1])}>
-              <People />
-              {suspect.prompts[1]}
-            </button>
-            <button className={`panel chip ${attach ? "on" : ""}`} disabled={busy || !saved} onClick={() => document.getElementById("evidence")?.scrollIntoView({ behavior: "smooth" })}>
-              <Doc />
-              {attach ? `Showing: ${evTitle(attach)}` : "Pick evidence to show"}
-            </button>
-            <button className="panel chip" disabled={busy || !saved} onClick={() => ask(suspect.prompts[2])}>
-              <Arrow />
-              {suspect.prompts[2]}
-            </button>
-          </div>
-
           <form
             className="panel ask"
             onSubmit={(e) => {
@@ -289,7 +270,7 @@ export default function Game({ initial }: { initial: PublicCase }) {
                 {evTitle(attach)} ✕
               </button>
             )}
-            <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={attach ? `Put it to ${suspect.name}…` : "Type your question…"} maxLength={500} disabled={!saved || !!reveal} />
+            <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={attach ? `Put it to ${suspect.name}…` : `Question ${suspect.name}…`} maxLength={500} disabled={!saved || !!reveal} />
             <button type="submit" aria-label="Ask" disabled={busy || !saved}>
               <Send />
             </button>

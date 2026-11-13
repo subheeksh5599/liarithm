@@ -46,8 +46,6 @@ export interface Suspect {
   rules: SuspectSlotRule[];
   /** Words this suspect must never say, at any point. */
   forbidden: string[];
-  /** Questions offered as one-tap chips. */
-  prompts: string[];
 }
 
 export interface CaseFile {

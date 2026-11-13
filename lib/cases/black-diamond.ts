@@ -71,7 +71,6 @@ export const blackDiamond: CaseFile = {
         { slot: "kai.left_cafe", cover: "after_21", truth: "before_21", admitAfter: ["ev-witness"] },
       ],
       forbidden: ["locker 14", "pier 9", "the safe code", "i took it", "i stole", "i took the", "i did it"],
-      prompts: ["Where were you between 8 and 8:30?", "When did you leave the café?", "How well do you know Ren's office?"],
     },
     {
       id: "ren",
@@ -83,7 +82,6 @@ export const blackDiamond: CaseFile = {
       secret: "I raised the diamond's insurance last week because the broker told me to. It makes me look guilty, so I would rather not discuss it.",
       rules: [{ slot: "ren.where", cover: "grand_hotel", truth: "grand_hotel", admitAfter: [] }],
       forbidden: [],
-      prompts: ["Where were you tonight?", "Who knew the safe code?", "Was the diamond insured?"],
     },
     {
       id: "sora",
@@ -95,7 +93,6 @@ export const blackDiamond: CaseFile = {
       secret: "I was in the office until 20:31 copying contract files I planned to sell. I saw a man in a grey coat on the stairs around 20:15 but I cannot say so without explaining why I was there.",
       rules: [{ slot: "sora.where", cover: "home", truth: "harbor_office", admitAfter: ["ev-keycard"] }],
       forbidden: ["contract files", "sell the files", "copying files"],
-      prompts: ["Where were you this evening?", "Who has a key to the office?", "Did you see anyone near the office?"],
     },
     {
       id: "jin",
@@ -107,7 +104,6 @@ export const blackDiamond: CaseFile = {
       secret: "I didn't wait at the office. I parked on Main Street to smoke and nap. If Ren finds out, I'm finished.",
       rules: [{ slot: "jin.where", cover: "harbor_office", truth: "main_street", admitAfter: ["ev-cctv"] }],
       forbidden: [],
-      prompts: ["Where were you parked?", "Did anyone go into the office?", "What time did Ren call you?"],
     },
   ],
   evidence: [
