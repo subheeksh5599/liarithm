@@ -277,8 +277,7 @@ npm run build && npm start   # http://localhost:3000
 | `SESSION_SECRET` | yes | Seals sessions and signs the testimony log (32+ random characters, e.g. `openssl rand -hex 32`) |
 | `SERV_BASE_URL`, `SERV_API_KEY`, `SERV_MODEL` | yes | The brain |
 | `BRAIN_1_*` … `BRAIN_3_*` | no | Any OpenAI-compatible brain, used only when SERV cannot answer |
-| `DOLPHIN_BASE_URL`, `DOLPHIN_API_KEY`, `DOLPHIN_MODEL` | no | A voice on the Dolphin network, tried first |
-| `VOICE_1_*` … `VOICE_5_*` | no | Any other OpenAI-compatible voice, tried in order |
+| `VOICE_1_*` … `VOICE_5_*` | no | Any OpenAI-compatible voice, tried in order |
 
 ## Tech stack
 

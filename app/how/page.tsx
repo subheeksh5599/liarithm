@@ -104,7 +104,7 @@ export default function HowPage() {
           </tr>
           <tr>
             <td>How it sounds</td>
-            <td className="muted">A voice model (Dolphin or another), then checked by code</td>
+            <td className="muted">A voice model, then checked by code</td>
           </tr>
           <tr>
             <td>Whether you caught a lie</td>

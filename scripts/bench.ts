@@ -23,7 +23,7 @@ const env = (k: string) => {
 
 /** The baseline: one call to the voice model, with the secret in its prompt. */
 async function baseline(system: string, question: string): Promise<string> {
-  const base = process.env.DOLPHIN_API_KEY && process.env.BENCH_BASELINE !== "voice1" ? "DOLPHIN" : "VOICE_1";
+  const base = "VOICE_1";
   const res = await fetch(`${env(`${base}_BASE_URL`)}/chat/completions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${env(`${base}_API_KEY`)}`, "Content-Type": "application/json" },

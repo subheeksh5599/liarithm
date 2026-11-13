@@ -20,7 +20,7 @@ const parts: [string, string, string][] = [
   ["Deciding each move", "SERV Reasoning", "Each suspect's rules are a branching policy (Multipath): what they may claim, and which evidence unlocks which admission. SERV returns one structured move per question."],
   ["Refusing jailbreaks", "SERV Reasoning", "The prompt guard runs on every question. A caught attempt becomes a refusal in character, and it is marked in the log."],
   ["Checking the move", "SERV Reasoning", "The Shadow Agent validates difficult moves before they are used."],
-  ["Saying the line", "a voice model", "Dolphin or any OpenAI-compatible model the deployer configures. With none, SERV phrases the line itself."],
+  ["Saying the line", "a voice model", "Any OpenAI-compatible model the deployer configures. With none, SERV phrases the line itself."],
   ["What a suspect may claim", "code", "Every claimed fact must belong to this suspect and be unlocked by evidence already shown to them."],
   ["What a line may say", "code", "A line that names a forbidden fact or a still-locked answer is thrown away before you see it."],
   ["Catching a lie", "code", "Evidence fixes a value. A claim with a different value is a proven lie."],

@@ -20,16 +20,6 @@ Every figure and quote the README and pitch rely on, with where it came from. Al
 | `gpt-6-luna` price | https://docs.openserv.ai/serv-reasoning/models.md | $0.130 input, $0.650 output per million tokens, 1M context; "Prices are per million tokens and include SERV Reasoning." |
 | Catalogue providers | https://docs.openserv.ai/serv-reasoning/models.md | OpenAI, Anthropic and Google models only |
 
-## Dolphin network
-
-| Claim | Source | Quote or figure |
-|---|---|---|
-| Endpoint and model | https://dphn.ai/docs/dphn-api | `https://lighthouse.dphn.ai/run/text-v/v1`, model `deepseek-ai/DeepSeek-V4.1-Flash` |
-| Price and context | https://dphn.ai/docs/dphn-api | $0.01 input, $0.07 output per million tokens; context 1,048,576 tokens |
-| Fallback behaviour | https://dphn.ai/docs/dphn-api | "a hardware fault can cause a request to fall back to OpenRouter … only to Zero Data Retention (ZDR) providers" |
-| Error codes | https://dphn.ai/docs/dphn-api | `401` invalid key, `402` insufficient credits, `404` unknown model, `429` too many requests |
-| Game NPCs as a named use case | https://dphn.ai/project | "Mature-rated RPG NPCs with nuanced, morally complex behavior." |
-| Game developer SDK on the roadmap | https://dphn.ai/project | section "The DolphinPod Inference SDK library for game developers" |
 
 ## Neighbours (existing AI detective games)
 
