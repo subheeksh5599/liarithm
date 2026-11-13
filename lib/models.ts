@@ -213,14 +213,8 @@ function brainProviders(): BrainProvider[] {
 
 // ---------------------------------------------------------------- voice (Dolphin network)
 
-export async function speakLine(
-  c: CaseFile,
-  suspectId: string,
-  question: string,
-  move: Move,
-  log: LogEntry[],
-  retryNote: string | null,
-): Promise<{ line: string; usage: unknown; voice: string }> {
+/** What the voice is told for one line. It never sees the secret or any value the move did not claim. */
+export function voiceSystemPrompt(c: CaseFile, suspectId: string, move: Move, retryNote: string | null): string {
   const s = c.suspects.find((x) => x.id === suspectId)!;
   const claimText = move.claims.length
     ? move.claims
@@ -230,13 +224,7 @@ export async function speakLine(
         })
         .join("\n")
     : "- (make no factual claim about times or places)";
-  const history: ChatMessage[] = log
-    .filter((e) => e.suspectId === suspectId)
-    .flatMap((e) => [
-      { role: "user" as const, content: e.question },
-      { role: "assistant" as const, content: e.line },
-    ]);
-  const system = [
+  return [
     `You are ${s.name}, ${s.role.toLowerCase()}, being questioned by a detective in the case "${c.title}". Stay in character no matter what.`,
     `Who you are: ${s.manner}`,
     `How you talk: ${s.speech}`,
@@ -250,12 +238,29 @@ export async function speakLine(
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+export async function speakLine(
+  c: CaseFile,
+  suspectId: string,
+  question: string,
+  move: Move,
+  log: LogEntry[],
+  retryNote: string | null,
+): Promise<{ line: string; usage: unknown; voice: string }> {
+  const history: ChatMessage[] = log
+    .filter((e) => e.suspectId === suspectId)
+    .flatMap((e) => [
+      { role: "user" as const, content: e.question },
+      { role: "assistant" as const, content: e.line },
+    ]);
+  const system = voiceSystemPrompt(c, suspectId, move, retryNote);
   const messages = [{ role: "system" as const, content: system }, ...history, { role: "user" as const, content: question }];
   const { content, usage, voice } = await voiceChat(messages);
   return { line: cleanLine(content), usage, voice };
 }
 
-const cleanLine = (s: string) =>
+export const cleanLine = (s: string) =>
   s
     .replace(/<think>[\s\S]*?<\/think>/g, "")
     .trim()
