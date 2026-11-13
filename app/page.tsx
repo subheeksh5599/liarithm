@@ -40,13 +40,6 @@ export default function Menu() {
         </nav>
       </div>
 
-      {/* small screens: the drawn menu is too small to tap, so show plain buttons under the art */}
-      <nav className="menu-mobile" aria-label="Main menu">
-        <Link href={`/case/${first.id}`} className="panel caps">Play</Link>
-        <Link href="/cases" className="panel caps">Case files</Link>
-        <Link href="/how" className="panel caps">How it works</Link>
-        <Link href="/studios" className="panel caps">For studios</Link>
-      </nav>
     </main>
   );
 }

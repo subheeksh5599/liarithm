@@ -187,39 +187,6 @@ textarea {
   overflow: hidden;
   clip: rect(0 0 0 0);
 }
-.menu-mobile {
-  display: none;
-}
-@media (max-width: 760px), (max-aspect-ratio: 1/1) {
-  .stage {
-    width: 100vw;
-    aspect-ratio: 784 / 768;
-  }
-  .menu-video {
-    object-fit: cover;
-    object-position: 0 0;
-    width: 171.4%;
-  }
-  .menu-title {
-    font-size: 9cqw;
-  }
-  .stage .hot,
-  .stage .patch {
-    display: none;
-  }
-  .menu-mobile {
-    display: grid;
-    gap: 12px;
-    width: min(420px, 100% - 32px);
-    padding: 20px 0 32px;
-  }
-  .menu-mobile a {
-    text-align: center;
-    padding: 14px;
-    font-size: 13px;
-  }
-}
-
 /* ------------------------------------------------------------------ inner pages */
 
 .page {
@@ -959,82 +926,6 @@ pre.code {
   color: var(--lie);
 }
 
-@media (max-width: 1180px) {
-  .board {
-    grid-template-columns: 1fr;
-  }
-  .bar {
-    grid-template-columns: 1fr auto;
-    height: auto;
-    padding: 14px 18px;
-    gap: 10px;
-  }
-  .crumb {
-    display: none;
-  }
-  .col.left {
-    order: 1;
-  }
-  .col.center {
-    order: 2;
-  }
-  .col.right {
-    order: 3;
-  }
-  .suspect-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  .tagline-foot {
-    display: none;
-  }
-  .flow,
-  .plans {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 640px) {
-  .chips {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .speaker {
-    display: none;
-  }
-  .pick {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .suspect-list {
-    grid-template-columns: 1fr;
-  }
-}
-
-.star-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--text);
-}
-.i18 {
-  width: 20px;
-  height: 20px;
-}
-
-.voice-tag {
-  display: block;
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--faint);
-  margin-top: 8px;
-}
-
-.folder-cover {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border: 1px solid var(--line);
-}
-
 /* ------------------------------------------------------------------ case checker */
 
 .check-live {
@@ -1097,4 +988,33 @@ pre.code {
   margin-top: 16px;
   border-top: 1px solid var(--line);
   padding-top: 12px;
+}
+
+/* ------------------------------------------------------------------ desktop only */
+
+.desktop-only {
+  display: none;
+}
+@media (max-width: 1023px) {
+  body > :not(.desktop-only) {
+    display: none !important;
+  }
+  .desktop-only {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 32px;
+    text-align: center;
+  }
+  .desktop-only h1 {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 500;
+    font-size: 40px;
+    letter-spacing: 0.3em;
+    padding-left: 0.3em;
+    text-transform: uppercase;
+  }
 }

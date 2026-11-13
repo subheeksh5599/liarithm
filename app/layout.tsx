@@ -13,7 +13,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <div className="desktop-only" role="note">
+          <h1>Liarithm</h1>
+          <p className="muted">Liarithm is built for a desktop browser. Open it on a computer with a window at least 1024 pixels wide.</p>
+        </div>
+      </body>
     </html>
   );
 }
