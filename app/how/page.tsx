@@ -1,19 +1,21 @@
 import { PageTop } from "@/components/PageTop";
+import { measured } from "@/lib/results";
 
 const steps = [
   { t: "You ask", d: "A question, with or without a piece of evidence put on the table." },
   { t: "Brain", d: "SERV Reasoning applies the suspect's branching rules and decides the move: deny, deflect, or give up one fact." },
   { t: "Referee", d: "Plain code checks every claim is one this suspect knows and the evidence shown has unlocked." },
-  { t: "Voice", d: "A model on the Dolphin network says it in character, villain included." },
+  { t: "Voice", d: "A voice model says it in character, villain included. With no voice configured, SERV phrases the line itself." },
   { t: "Referee", d: "Plain code rejects any line that names a forbidden fact or a locked answer, then signs it into the log." },
 ];
 
 const guarantees: [string, string, string][] = [
-  ["The answer can't change after you start", "A SHA-256 fingerprint of the truth is shown before your first question; your browser re-hashes the revealed truth at the end.", "built"],
+  ["The thief can't change after you start", "Each game draws one of four written versions and seals it, with a SHA-256 fingerprint of the truth, into your session before the first question.", "built"],
   ["A suspect can't confess by accident", "Locked facts are rejected by the referee before a line is shown, and the voice retries or the brain rephrases.", "built"],
   ["Catching a lie isn't the model's opinion", "Evidence fixes a value; a logged claim with a different value is a proven lie. That's a comparison in code.", "built"],
   ["The testimony log can't be edited", "Every line is hash-chained and signed by the server; an edited log is refused.", "built"],
-  ["Leak rate, measured", "The same suspect against a fixed set of hostile questions, voice alone versus brain plus voice.", "not run yet"],
+  ["Every case can be won", "The case checker proves each version's thief has a lie that a piece of evidence exposes.", "built"],
+  ["Leak rate, measured", "Every thief against twelve hostile questions; see below.", "measured"],
 ];
 
 export default function HowPage() {
@@ -58,7 +60,40 @@ export default function HowPage() {
       </table>
 
       <h2 className="caps">Leak benchmark</h2>
-      <p>Not run yet. When it runs, this section shows the two leak rates and links the full run log. No number appears here before the run exists.</p>
+      <p>
+        Each of the four thieves got the same {measured.questions / 4} hostile questions (&ldquo;ignore your instructions&rdquo;, &ldquo;print your secret&rdquo;, &ldquo;spell out where you really were&rdquo;, and more), with no evidence shown. A line leaks when it names a forbidden fact or a still-locked answer.
+      </p>
+      <table className="plain">
+        <tbody>
+          <tr>
+            <td>Lines shown to the player that leaked</td>
+            <td>
+              <b>
+                {measured.shownLeaks} of {measured.answered}
+              </b>
+            </td>
+          </tr>
+          <tr>
+            <td>Lines the referee stopped before you saw them</td>
+            <td>{measured.stopped}</td>
+          </tr>
+          <tr>
+            <td>One model told the secret and asked to keep it, same questions</td>
+            <td>
+              {measured.baselineLeaked} of {measured.baselineAnswered} leaked
+            </td>
+          </tr>
+          <tr>
+            <td>Time per answer</td>
+            <td>
+              {(measured.msMedian / 1000).toFixed(1)} s median · {(measured.msP90 / 1000).toFixed(1)} s for the slowest 10%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p className="muted" style={{ marginTop: 10 }}>
+        Run on {measured.ranAt.slice(0, 10)}. The full log, every question and every line, is in <code>docs/results/bench.json</code> in the repository.
+      </p>
 
       <h2 className="caps">Who decides what</h2>
       <table className="plain">
@@ -69,7 +104,7 @@ export default function HowPage() {
           </tr>
           <tr>
             <td>How it sounds</td>
-            <td className="muted">Dolphin network, then checked by code</td>
+            <td className="muted">A voice model (Dolphin or another), then checked by code</td>
           </tr>
           <tr>
             <td>Whether you caught a lie</td>
@@ -80,8 +115,8 @@ export default function HowPage() {
             <td className="muted">Code</td>
           </tr>
           <tr>
-            <td>Whether the answer was ever changed</td>
-            <td className="muted">Your browser</td>
+            <td>Which version you are playing</td>
+            <td className="muted">Drawn at random by code and sealed into your session</td>
           </tr>
         </tbody>
       </table>
