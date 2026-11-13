@@ -4,6 +4,7 @@ import bench from "@/docs/results/bench.json";
 import { costOf, median, SERV_PRICES, studioPricePer1000 } from "./pricing";
 
 interface Row {
+  move?: string;
   brain?: string;
   brainTokens?: { input: number; output: number };
   shownLeaks?: string[];
@@ -34,6 +35,7 @@ export const measured = {
   baselineAnswered: summary.baseline.answered,
   msMedian: summary.liarithm.msMedian,
   msP90: summary.liarithm.msP90,
+  moves: rows.reduce<Record<string, number>>((m, r) => (r.move ? { ...m, [r.move]: (m[r.move] ?? 0) + 1 } : m), {}),
   inputTokens: median(answered.map((r) => r.brainTokens!.input)),
   outputTokens: median(answered.map((r) => r.brainTokens!.output)),
 };

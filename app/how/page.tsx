@@ -78,9 +78,9 @@ export default function HowPage() {
             <td>{measured.stopped}</td>
           </tr>
           <tr>
-            <td>One model told the secret and asked to keep it, same questions</td>
+            <td>How the suspects answered</td>
             <td>
-              {measured.baselineLeaked} of {measured.baselineAnswered} leaked
+              {measured.moves.refuse ?? 0} refused in character · {measured.moves.deny ?? 0} denied · {(measured.moves.deflect ?? 0) + (measured.moves.answer ?? 0)} deflected or small talk
             </td>
           </tr>
           <tr>
