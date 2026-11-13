@@ -6,3 +6,5 @@ node_modules/
 RUNBOOK.md
 .DS_Store
 *.tsbuildinfo
+.vercel
+.env*
