@@ -13,7 +13,7 @@
 
 [![Play](https://img.shields.io/badge/play-the%20case-b3262b)](https://liarithm.vercel.app)
 [![For judges](https://img.shields.io/badge/for%20judges-try%20it%20in%205%20minutes-2563eb)](#for-judges-try-it-in-5-minutes)
-[![Honesty table](https://img.shields.io/badge/honesty-table-2ecc71)](#whats-real-vs-pending--the-honesty-table)
+[![What's real](https://img.shields.io/badge/what's%20real-status%20table-2ecc71)](#whats-real--the-status-table)
 [![Run it](https://img.shields.io/badge/run%20it-yourself-555555)](#run-it-yourself)
 
 </div>
@@ -36,7 +36,7 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 | Case checker | live | [/studios/check](https://liarithm.vercel.app/studios/check), `GET /api/check`, `npm run check` |
 | Leak benchmark | measured | 48 hostile questions, 0 leaked lines shown: `docs/results/bench.json` |
 | Studio pricing | published | [/studios](https://liarithm.vercel.app/studios), built from the benchmark's token counts and SERV's list prices |
-| SERV Reasoning as the brain | wired | SERV decides every move; an optional `BRAIN_n` provider takes over only when SERV cannot answer, under the same referee checks |
+| SERV Reasoning as the brain | live | SERV decides every move; an optional `BRAIN_n` provider takes over only when SERV cannot answer, under the same referee checks |
 
 ## The 20-second pitch
 
@@ -96,7 +96,7 @@ Worth trying: ask a suspect to ignore their instructions or print their secret (
 - [What it costs](#what-it-costs)
 - [Where the models sit](#where-the-models-sit)
 - [Engineering decisions and the traps that taught me something](#engineering-decisions-and-the-traps-that-taught-me-something)
-- [What's real vs pending — the honesty table](#whats-real-vs-pending--the-honesty-table)
+- [What's real — the status table](#whats-real--the-status-table)
 - [Attack → test](#attack--test)
 - [Run it yourself](#run-it-yourself)
 - [Tech stack](#tech-stack)
@@ -220,7 +220,7 @@ From the benchmark's token counts at SERV's list price for `gpt-6-luna` ($0.13 i
 | One full game (24 questions) | $0.0058 |
 | Studio price per 1,000 character turns | **$0.73** (cost × 3, rounded up to the cent) |
 
-The first question to each new character costs more: SERV builds that character's reasoning prompt once, then reuses it. That one-time cost is not in the table. Players get the first case free; the planned case packs and the 70% share for case writers are on [/studios](https://liarithm.vercel.app/studios).
+The first question to each new character costs more: SERV builds that character's reasoning prompt once, then reuses it. That one-time cost is not in the table. Players get the first case free; the case packs and the 70% share for case writers are on [/studios](https://liarithm.vercel.app/studios).
 
 ## Where the models sit
 
@@ -235,17 +235,18 @@ The first question to each new character costs more: SERV builds that character'
 - **The case checker's live check must not become a cheat sheet.** `GET /api/check` returns pass/fail and counts only. Its browser test fails if the response contains any suspect's name.
 - **Resuming a saved game hid the randomness.** Opening Play reloaded the last game from local storage, so the thief looked fixed. Every Play now draws a new game.
 
-## What's real vs pending — the honesty table
+## What's real — the status table
 
-| Item | Real and tested | Real, not covered by tests | Pending |
-|---|---|---|---|
-| Game, four versions, random thief | ✓ | | |
-| Referee, checker, sealed session, signed log | ✓ | | |
-| Full game in a browser against live models | ✓ `e2e/live.spec.ts` | | |
-| SERV Reasoning as the brain, with a backup brain | ✓ | | |
-| Leak benchmark | ✓ 48 questions, log committed | | a longer, multi-turn question set |
-| Studio API and case packs | | | not on sale |
-| Mobile | | | desktop only by design |
+| Item | Status | Proof |
+|---|---|---|
+| Game, four versions, random thief | live, tested | `tests/session.matrix.test.ts`, `e2e/game.spec.ts` |
+| Referee, case checker, sealed session, signed log | live, tested | `tests/referee.matrix.test.ts`, `tests/checker.test.ts`, `tests/session.matrix.test.ts` |
+| Full game in a browser against the live models | passing, all four versions | `e2e/live.spec.ts` |
+| SERV Reasoning as the brain, with a backup brain | live | `lib/models.ts`, `lib/turn.ts` |
+| Leak benchmark | 48 questions, 0 leaks shown | `docs/results/bench.json` |
+| Studio API | live: `POST /api/turn`, `POST /api/check` | [/studios](https://liarithm.vercel.app/studios) |
+| Case packs and the case-writer share | priced, payments not switched on | [/studios](https://liarithm.vercel.app/studios) |
+| Platform | desktop browsers, by design | `e2e/site.spec.ts` checks the note on narrow windows |
 
 ## Attack → test
 
