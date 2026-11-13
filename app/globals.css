@@ -1051,8 +1051,8 @@ pre.code {
   flex-wrap: wrap;
 }
 .tag.bad {
-  color: var(--red);
-  border-color: var(--red);
+  color: var(--lie);
+  border-color: var(--lie);
 }
 .check-grid {
   display: grid;
