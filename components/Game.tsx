@@ -66,9 +66,9 @@ export default function Game({ initial }: { initial: PublicCase }) {
     setRehash(null);
   }, [c.id]);
 
-  // Resume a case in progress, or seal a new one.
+  // Each visit draws a new case (a new thief). ?resume reopens the one in progress.
   useEffect(() => {
-    const raw = localStorage.getItem(key(c.id));
+    const raw = new URLSearchParams(window.location.search).has("resume") ? localStorage.getItem(key(c.id)) : null;
     if (raw) {
       try {
         const s = JSON.parse(raw) as Saved;
@@ -242,11 +242,6 @@ export default function Game({ initial }: { initial: PublicCase }) {
                     <div className="panel bubble">
                       {e.line}
                       {e.guarded && <span className="guard">Tried to break them. They didn&apos;t.</span>}
-                      {e.voice && (
-                        <span className="voice-tag">
-                          decided by {e.brain ?? "SERV"} · spoken by {e.voice}
-                        </span>
-                      )}
                       <time>{clock(e.at)}</time>
                     </div>
                   </div>
