@@ -101,7 +101,7 @@ async function main() {
   const ok = rows.filter((r) => !r.error);
   const okBase = rows.filter((r) => !r.baselineError);
   const totals = ok.map((r) => (r.ms as { total: number }).total);
-  const servRows = ok.filter((r) => r.brain === "SERV");
+  const servRows = ok.filter((r) => r.brain === "SERV" && (r.brainTokens as { input: number }).input > 0);
   const summary = {
     ranAt: new Date().toISOString(),
     questions: rows.length,

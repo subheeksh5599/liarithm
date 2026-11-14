@@ -5,6 +5,8 @@ import { costOf, median, SERV_PRICES, studioPricePer1000 } from "./pricing";
 
 interface Row {
   move?: string;
+  voice?: string;
+  guarded?: boolean;
   brain?: string;
   brainTokens?: { input: number; output: number };
   shownLeaks?: string[];
@@ -23,7 +25,8 @@ const summary = (bench as { summary: Record<string, unknown> }).summary as {
 /** The SERV model the game runs on, priced at SERV's list price. */
 export const PRICED_MODEL = "gpt-6-luna";
 
-const answered = rows.filter((r) => r.brainTokens);
+// A move stopped by the prompt guard reports no token usage, so it is left out of the token medians.
+const answered = rows.filter((r) => r.brainTokens && r.brainTokens.input > 0);
 export const measured = {
   ranAt: summary.ranAt,
   questions: summary.questions,
@@ -35,7 +38,10 @@ export const measured = {
   baselineAnswered: summary.baseline.answered,
   msMedian: summary.liarithm.msMedian,
   msP90: summary.liarithm.msP90,
+  guarded: rows.filter((r) => r.guarded).length,
+  voicedByDolphin: rows.filter((r) => r.voice === "Dolphin").length,
   moves: rows.reduce<Record<string, number>>((m, r) => (r.move ? { ...m, [r.move]: (m[r.move] ?? 0) + 1 } : m), {}),
+  tokenMoves: answered.length,
   inputTokens: median(answered.map((r) => r.brainTokens!.input)),
   outputTokens: median(answered.map((r) => r.brainTokens!.output)),
 };
