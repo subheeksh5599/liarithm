@@ -78,6 +78,18 @@ export default function HowPage() {
             <td>{measured.stopped}</td>
           </tr>
           <tr>
+            <td>Questions SERV&apos;s prompt guard caught as attempts to break the suspect</td>
+            <td>
+              {measured.guarded} of {measured.answered}
+            </td>
+          </tr>
+          <tr>
+            <td>Lines spoken by Dolphin</td>
+            <td>
+              {measured.voicedByDolphin} of {measured.answered}, the rest by the backup voice when Dolphin was slow to answer
+            </td>
+          </tr>
+          <tr>
             <td>How the suspects answered</td>
             <td>
               {measured.moves.refuse ?? 0} refused in character · {measured.moves.deny ?? 0} denied · {(measured.moves.deflect ?? 0) + (measured.moves.answer ?? 0)} deflected or small talk

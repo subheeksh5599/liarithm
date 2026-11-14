@@ -43,7 +43,7 @@ export default function StudiosPage() {
             <td>
               {int(measured.inputTokens)} in · {int(measured.outputTokens)} out
             </td>
-            <td className="muted">Measured over {measured.answered} benchmark questions, on the same prompts SERV receives</td>
+            <td className="muted">Median of {measured.tokenMoves} SERV moves in the benchmark</td>
           </tr>
           <tr>
             <td>SERV list price for {PRICED_MODEL}</td>
