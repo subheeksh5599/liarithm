@@ -106,7 +106,7 @@ export interface LogEntry {
   guarded: boolean;
   /** Which provider decided the move (SERV, or a named fallback when SERV could not answer). */
   brain: string;
-  /** Which provider spoke this line: a configured voice model, or the brain itself. */
+  /** Which provider spoke this line: the Dolphin network, another configured voice, or the brain itself. */
   voice: string;
   at: string;
   prev: string;

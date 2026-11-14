@@ -7,7 +7,7 @@ beforeAll(() => {
   process.env.SESSION_SECRET = "test-secret-only-for-the-test-suite-0123456789";
 });
 
-const say = (log: LogEntry[], line: string) => appendEntry("sid-1", log, { suspectId: "kai", question: "Where were you?", evidence: null, line, claims: [{ slot: "kai.where", value: "maple_cafe" }], guarded: false, brain: "SERV", voice: "SERV" });
+const say = (log: LogEntry[], line: string) => appendEntry("sid-1", log, { suspectId: "kai", question: "Where were you?", evidence: null, line, claims: [{ slot: "kai.where", value: "maple_cafe" }], guarded: false, brain: "SERV", voice: "Dolphin" });
 
 describe("the truth fingerprint", () => {
   it("commits to the truth plus a per-session salt, and re-hashes to the same value", () => {

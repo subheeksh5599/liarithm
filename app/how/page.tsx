@@ -5,7 +5,7 @@ const steps = [
   { t: "You ask", d: "A question, with or without a piece of evidence put on the table." },
   { t: "Brain", d: "SERV Reasoning applies the suspect's branching rules and decides the move: deny, deflect, or give up one fact." },
   { t: "Referee", d: "Plain code checks every claim is one this suspect knows and the evidence shown has unlocked." },
-  { t: "Voice", d: "A voice model says it in character, villain included. With no voice configured, SERV phrases the line itself." },
+  { t: "Voice", d: "Dolphin's open DeepSeek V4.1 Flash, on the decentralized Dolphin network, says it in character, villain included." },
   { t: "Referee", d: "Plain code rejects any line that names a forbidden fact or a locked answer, then signs it into the log." },
 ];
 
@@ -104,7 +104,7 @@ export default function HowPage() {
           </tr>
           <tr>
             <td>How it sounds</td>
-            <td className="muted">A voice model, then checked by code</td>
+            <td className="muted">Dolphin network, then checked by code</td>
           </tr>
           <tr>
             <td>Whether you caught a lie</td>

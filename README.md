@@ -9,7 +9,7 @@
 ![Tests](https://img.shields.io/badge/tests-1%2C972%20passing-2ecc71)
 [![Live](https://img.shields.io/badge/live-liarithm.vercel.app-000000)](https://liarithm.vercel.app)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
-![Stack](https://img.shields.io/badge/SERV%20Reasoning%20·%20Next.js%20·%20TypeScript-14151a)
+![Stack](https://img.shields.io/badge/SERV%20Reasoning%20·%20Dolphin%20·%20Next.js-14151a)
 
 [![Play](https://img.shields.io/badge/play-the%20case-b3262b)](https://liarithm.vercel.app)
 [![For judges](https://img.shields.io/badge/for%20judges-try%20it%20in%205%20minutes-2563eb)](#for-judges-try-it-in-5-minutes)
@@ -56,7 +56,7 @@ REFEREE  code: every claim must belong to this suspect and be unlocked
          by evidence already shown to them
      |
      v
-VOICE    any OpenAI-compatible model, or SERV itself
+VOICE    Dolphin network: open DeepSeek V4.1 Flash on decentralized nodes
          says the line in character, villain included
      |
      v
@@ -157,7 +157,7 @@ A detective game is only fun if winning means you were right. If the house can m
 | Case files | `lib/cases/black-diamond.ts`: slots, evidence, suspects, four versions | data |
 | Brain | Picks the suspect's move and the claims it may make | SERV Reasoning (`-serv-kronos-multipath`, `serv_prompt_guard`, `serv_shadow_agent`) |
 | Referee | `lib/referee.ts`: allowed claims, line checks, contradictions, verdict | code |
-| Voice | Says the move in character | any OpenAI-compatible model, or SERV |
+| Voice | Says the move in character | Dolphin network, `deepseek-ai/DeepSeek-V4.1-Flash` |
 | Turn loop | `lib/turn.ts`: brain → referee → voice → referee, with retries | code |
 | Session | `lib/session.ts`: sealed token (version, salt), hash-chained signed log | code |
 | Case checker | `lib/checker.ts`, `app/api/check/route.ts`, `app/studios/check/page.tsx` | code |
@@ -226,7 +226,7 @@ The first question to each new character costs more: SERV builds that character'
 
 - **The brain decides, the voice performs.** SERV Reasoning chooses what a suspect does. The voice only decides how it sounds.
 - **Neither model decides the outcome.** Whether a lie is caught, whether a line is allowed, which thief you drew and whether your accusation is right are all code.
-- **Bring your own voice.** Any OpenAI-compatible model works as the voice. With none configured, SERV phrases the line itself.
+- **Dolphin speaks.** Every line is voiced by DeepSeek V4.1 Flash on the decentralized Dolphin network, an open model that will play a real villain. If Dolphin cannot answer, a backup voice takes over under the same referee checks.
 
 ## Engineering decisions and the traps that taught me something
 
@@ -264,7 +264,7 @@ The first question to each new character costs more: SERV builds that character'
 
 ## Run it yourself
 
-SERV Reasoning is the only required service; the voice is optional.
+You need SERV Reasoning for the brain and a Dolphin API key for the voice.
 
 ```bash
 git clone https://github.com/subheeksh5599/liarithm && cd liarithm
@@ -278,11 +278,12 @@ npm run build && npm start   # http://localhost:3000
 | `SESSION_SECRET` | yes | Seals sessions and signs the testimony log (32+ random characters, e.g. `openssl rand -hex 32`) |
 | `SERV_BASE_URL`, `SERV_API_KEY`, `SERV_MODEL` | yes | The brain |
 | `BRAIN_1_*` … `BRAIN_3_*` | no | Any OpenAI-compatible brain, used only when SERV cannot answer |
-| `VOICE_1_*` … `VOICE_5_*` | no | Any OpenAI-compatible voice, tried in order |
+| `DOLPHIN_BASE_URL`, `DOLPHIN_API_KEY`, `DOLPHIN_MODEL` | yes | The voice, on the Dolphin network |
+| `VOICE_1_*` … `VOICE_5_*` | no | Backup voices, any OpenAI-compatible endpoint, used only when Dolphin cannot answer |
 
 ## Tech stack
 
-Next.js 16 · React 19 · TypeScript 5.9 · Vitest · Playwright · SERV Reasoning (OpenAI-compatible endpoint) · deployed on Vercel. No database: the session is sealed in an encrypted token and the testimony log is hash-chained and signed.
+Next.js 16 · React 19 · TypeScript 5.9 · Vitest · Playwright · SERV Reasoning · Dolphin network (DeepSeek V4.1 Flash) · deployed on Vercel. No database: the session is sealed in an encrypted token and the testimony log is hash-chained and signed.
 
 ## Project layout
 

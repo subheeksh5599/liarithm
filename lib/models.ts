@@ -211,7 +211,7 @@ function brainProviders(): BrainProvider[] {
   return list;
 }
 
-// ---------------------------------------------------------------- voice
+// ---------------------------------------------------------------- voice (Dolphin network)
 
 /** What the voice is told for one line. It never sees the secret or any value the move did not claim. */
 export function voiceSystemPrompt(c: CaseFile, suspectId: string, move: Move, retryNote: string | null): string {
@@ -267,7 +267,11 @@ export const cleanLine = (s: string) =>
     .replace(/^["“]|["”]$/g, "")
     .trim();
 
-/** A voice provider. The one that actually spoke is recorded on the signed testimony entry. */
+/**
+ * The voice runs on the Dolphin network. When Dolphin cannot answer (no credit, rate limit, outage),
+ * the line is spoken by the next configured fallback provider instead, and the provider that actually
+ * spoke is recorded on the signed testimony entry and shown under the line.
+ */
 interface VoiceProvider {
   name: string;
   base: string;
@@ -277,11 +281,14 @@ interface VoiceProvider {
 }
 
 /**
- * Voice providers come entirely from whoever runs the app. Configure any number of
- * OpenAI-compatible providers, tried in order, or none at all: with no voice configured, SERV phrases every line itself.
+ * Voice providers come entirely from whoever runs the app. Configure Dolphin, any number of other
+ * OpenAI-compatible providers, or none at all: with no voice configured, SERV phrases every line itself.
  */
 function voiceProviders(): VoiceProvider[] {
   const list: VoiceProvider[] = [];
+  if (process.env.DOLPHIN_API_KEY) {
+    list.push({ name: "Dolphin", base: env("DOLPHIN_BASE_URL"), key: env("DOLPHIN_API_KEY"), model: env("DOLPHIN_MODEL"), extra: { reasoning_effort: "low" } });
+  }
   for (let n = 1; n <= 5; n++) {
     const name = process.env[`VOICE_${n}_NAME`];
     if (!name) continue;
@@ -305,14 +312,14 @@ async function voiceChat(messages: ChatMessage[]): Promise<{ content: string; us
         skipUntil.delete(p.name);
         return { ...r, voice: p.name };
       }
-      last = new UpstreamError(p.name, 502, `${p.name} returned an empty line`);
+      last = new UpstreamError("Dolphin", 502, `${p.name} returned an empty line`);
       skipUntil.set(p.name, Date.now() + 60_000);
     } catch (e) {
       last = e;
       skipUntil.set(p.name, Date.now() + (e instanceof UpstreamError && e.status === 402 ? 600_000 : 60_000));
     }
   }
-  throw last ?? new UpstreamError("Voice", 502, "No voice provider answered.");
+  throw last ?? new UpstreamError("Dolphin", 502, "No voice provider answered.");
 }
 
 /** Last resort when the voice keeps leaking: SERV phrases the already-checked move itself. */
