@@ -33,6 +33,9 @@ export default function JudgesPage() {
       <PageTop />
       <h1>For judges</h1>
       <p className="lede">A full game takes about five minutes. No sign-up and no key. Use a desktop browser.</p>
+      <p>
+        <a href="https://youtu.be/oHWsTZ20U9Y">Watch the 2:24 demo</a> first if you prefer.
+      </p>
 
       <h2 className="caps">Play one case</h2>
       <ol className="judge-steps">

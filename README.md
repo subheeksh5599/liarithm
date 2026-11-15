@@ -11,6 +11,8 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
 ![Stack](https://img.shields.io/badge/SERV%20Reasoning%20·%20Dolphin%20·%20Next.js-14151a)
 
+[![Watch the demo](https://img.shields.io/badge/watch-demo%20(2%3A24)-ff0000?logo=youtube)](https://youtu.be/oHWsTZ20U9Y)
+[![X post](https://img.shields.io/badge/X-%40subheeksh-000000?logo=x)](https://x.com/subheeksh/status/2121978120630907005)
 [![Play](https://img.shields.io/badge/play-the%20case-b3262b)](https://liarithm.vercel.app)
 [![For judges](https://img.shields.io/badge/for%20judges-try%20it%20in%205%20minutes-2563eb)](#for-judges-try-it-in-5-minutes)
 [![What's real](https://img.shields.io/badge/what's%20real-status%20table-2ecc71)](#whats-real--the-status-table)
@@ -38,6 +40,14 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 | Studio pricing | published | [/studios](https://liarithm.vercel.app/studios), built from the benchmark's token counts and SERV's list prices |
 | SERV Reasoning as the brain | live | SERV decides every move; an optional `BRAIN_n` provider takes over only when SERV cannot answer, under the same referee checks |
 | Dolphin as the voice | live | DeepSeek V4.1 Flash on the Dolphin network speaks the lines; 41 of 48 in the leak benchmark; played 39 of 40 villain scenes at 2.2 s, the fastest voice tested: `docs/results/voice-bench.json` |
+
+## ▶ Demo
+
+[![LIARITHM demo: Kai answers at the interrogation table, evidence on the right](docs/media/demo-poster.webp)](https://youtu.be/oHWsTZ20U9Y)
+
+**[Watch the demo on YouTube (2:24)](https://youtu.be/oHWsTZ20U9Y)** · **[Play it live](https://liarithm.vercel.app)** · **[X post](https://x.com/subheeksh/status/2121978120630907005)**
+
+*One unedited take on the live site: four suspects questioned with evidence, an accusation, then a second game with a different thief.*
 
 ## The 20-second pitch
 
@@ -84,6 +94,7 @@ Worth trying: ask a suspect to ignore their instructions or print their secret (
 ## Table of contents
 
 - [Live status](#live-status)
+- [Demo](#-demo)
 - [The 20-second pitch](#the-20-second-pitch)
 - [For judges: try it in 5 minutes](#for-judges-try-it-in-5-minutes)
 - [See it in one command](#see-it-in-one-command)
