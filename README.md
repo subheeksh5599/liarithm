@@ -6,7 +6,7 @@
 
 ### A detective game where suspects really lie, and you win by catching them with evidence.
 
-![Tests](https://img.shields.io/badge/tests-1%2C972%20passing-2ecc71)
+![Tests](https://img.shields.io/badge/tests-2%2C004%20passing-2ecc71)
 [![Live](https://img.shields.io/badge/live-liarithm.vercel.app-000000)](https://liarithm.vercel.app)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
 ![Stack](https://img.shields.io/badge/SERV%20Reasoning%20·%20Dolphin%20·%20Next.js-14151a)
@@ -18,7 +18,7 @@
 
 </div>
 
-**Live at [liarithm.vercel.app](https://liarithm.vercel.app)** (desktop browser). One case, four written versions, a different thief every time you press Play. 1,934 unit tests and 38 browser tests, including one that plays every version to a win against the live models.
+**Live at [liarithm.vercel.app](https://liarithm.vercel.app)** (desktop browser). One case, four written versions, a different thief every time you press Play. 1,966 unit tests and 38 browser tests, including one that plays every version to a win against the live models.
 
 Liarithm (liar + algorithm) puts you in an interrogation room with four suspects. They answer in their own voice, they bend the truth, and they hold their story under pressure. You win by putting the one piece of evidence on the table that breaks it, then naming the thief. A reasoning layer decides, turn by turn, what each suspect may admit, so nobody confesses by accident. Plain code decides everything that matters for winning: what a suspect may claim, whether a line gives too much away, whether you caught a lie, and whether your accusation is right.
 
@@ -37,7 +37,7 @@ SUSPECTS MAY LIE  ≠  THE GAME MAY CHEAT
 | Leak benchmark | measured | 48 hostile questions, 0 leaked lines shown, 29 caught by SERV's prompt guard: `docs/results/bench.json` |
 | Studio pricing | published | [/studios](https://liarithm.vercel.app/studios), built from the benchmark's token counts and SERV's list prices |
 | SERV Reasoning as the brain | live | SERV decides every move; an optional `BRAIN_n` provider takes over only when SERV cannot answer, under the same referee checks |
-| Dolphin as the voice | live | DeepSeek V4.1 Flash on the Dolphin network speaks the lines; 41 of 48 in the benchmark |
+| Dolphin as the voice | live | DeepSeek V4.1 Flash on the Dolphin network speaks the lines; 41 of 48 in the leak benchmark; played 39 of 40 villain scenes at 2.2 s, the fastest voice tested: `docs/results/voice-bench.json` |
 
 ## The 20-second pitch
 
@@ -94,6 +94,7 @@ Worth trying: ask a suspect to ignore their instructions or print their secret (
 - [The turn loop, step by step](#the-turn-loop-step-by-step)
 - [Where the guarantee is enforced](#where-the-guarantee-is-enforced)
 - [What the benchmark measures](#what-the-benchmark-measures)
+- [Why the voice is Dolphin's open model](#why-the-voice-is-dolphins-open-model)
 - [What it costs](#what-it-costs)
 - [Where the models sit](#where-the-models-sit)
 - [Engineering decisions and the traps that taught me something](#engineering-decisions-and-the-traps-that-taught-me-something)
@@ -125,8 +126,8 @@ The unit suite:
 
 ```
 $ npm test
- Test Files  6 passed (6)
-      Tests  1934 passed (1934)
+ Test Files  7 passed (7)
+      Tests  1966 passed (1966)
 ```
 
 ## What Liarithm is NOT
@@ -212,6 +213,19 @@ A detective game is only fun if winning means you were right. If the house can m
 | SERV tokens per move | 1,211 in, 142 out (median of the 19 moves the guard let through; a guarded move reports no usage) |
 
 Run on 14 Nov 2026 with SERV Reasoning deciding every move and the Dolphin network speaking; the full log, with every question, every line and the provider that answered it, is in `docs/results/bench.json`. The same run asked Dolphin's model on its own, told the secret and asked to keep it. Under the same word test it flagged 2 of 48 lines, and both were false matches on "the office" in a denial ("I left the office just before seven"), so single questions alone did not separate the two designs; the prompt guard and the referee are what make the result a guarantee rather than luck. An earlier run found more false matches, all honest denials ("I never left the car"), which is how the referee's denial fix below was found.
+
+## Why the voice is Dolphin's open model
+
+`scripts/voice-bench.ts` gives four cloud voices the same 40 scenes a mystery needs from its thief (ten scenes for each of the four thieves): taunt the detective, warn off a witness, steer suspicion onto an innocent, close with a smug last line. Each voice gets exactly the prompt the game sends. A line fails if it refuses or steps out of character, or if the referee finds a leak in it.
+
+| Voice (all cloud APIs) | Played the scene | Refused or broke character | Leaked | Empty | Median time | List price per million tokens (in / out) |
+|---|---|---|---|---|---|---|
+| **Dolphin · DeepSeek V4.1 Flash, open weights** | **39 / 40** | 0 | 0 | 1 | **2.2 s** | **$0.01 / $0.07** |
+| SERV · gpt-6-luna, closed | 40 / 40 | 0 | 0 | 0 | 6.6 s | $0.13 / $0.65 |
+| SERV · gemini-3.1-flash-lite, closed | 40 / 40 | 0 | 0 | 0 | 5.3 s | $0.30 / $1.80 |
+| SERV · claude-haiku-4.5, closed | 35 / 40 | 2 | 3 | 0 | 5.3 s | $1.25 / $6.50 |
+
+What it shows, stated plainly: on these scenes the cheapest closed models also stayed in character, so Dolphin's case is not that the others refuse. It is that Dolphin plays the villain about **2.5 times faster** than any closed voice here, at **13 to 100 times less per input token**, and on weights that cannot be changed or withdrawn under a game that has already shipped. One closed model did refuse ("I need to step out of character here") and also let three locked answers slip, which the referee would have caught. Dolphin returned one empty line; the game retries an empty line automatically. Every line is in `docs/results/voice-bench.json`.
 
 ## What it costs
 
@@ -303,11 +317,11 @@ lib/turn.ts          one turn: brain, referee, voice, referee
 lib/models.ts        SERV and voice calls, prompts
 lib/session.ts       sealed session, fingerprint, signed log
 lib/pricing.ts       list prices, cost per call, studio price
-lib/bench/           hostile questions
-scripts/             bench.ts, check-cases.ts, warm.ts, play.mjs, brain-probe.ts
+lib/bench/           hostile questions, villain scenes and the refusal test
+scripts/             bench.ts, voice-bench.ts, check-cases.ts, warm.ts, play.mjs, brain-probe.ts
 tests/               unit tests (Vitest)
 e2e/                 browser tests (Playwright)
-docs/results/        bench.json, the benchmark log
+docs/results/        bench.json (leak benchmark), voice-bench.json (villain-voice benchmark)
 ```
 
 ## Full command reference
@@ -319,11 +333,12 @@ docs/results/        bench.json, the benchmark log
 | `npm run test:live` | Plays all four versions to a win against the live models (calls the models) |
 | `npm run check` | Case checker over the shipped cases, or `npm run check -- my-case.json` |
 | `npm run bench` | Leak benchmark; writes `docs/results/bench.json` |
+| `npm run bench:voice` | Villain-voice benchmark, Dolphin vs closed models on SERV; writes `docs/results/voice-bench.json` |
 | `npx tsx --env-file=.env.local scripts/warm.ts` | Primes SERV's cached reasoning prompt for every suspect |
 
 ## Tests
 
-1,972 tests: 1,934 unit tests and 38 browser tests. Most unit tests are table-driven: each case is its own reported test, generated from the shipped cases so that adding a suspect, a rule or a piece of evidence adds its tests automatically. The tables cover every rule of every suspect in every version (locked, unlocked, cover, foreign slots), every alias of every answer, every forbidden phrase in five spellings, every evidence fix against every wrong value, every field of a signed log, 48 positions in a sealed token, and hundreds of deliberately broken case files. The benchmark tables found the denial bug described above.
+1,972 tests: 1,966 unit tests and 38 browser tests. Most unit tests are table-driven: each case is its own reported test, generated from the shipped cases so that adding a suspect, a rule or a piece of evidence adds its tests automatically. The tables cover every rule of every suspect in every version (locked, unlocked, cover, foreign slots), every alias of every answer, every forbidden phrase in five spellings, every evidence fix against every wrong value, every field of a signed log, 48 positions in a sealed token, and hundreds of deliberately broken case files. The benchmark tables found the denial bug described above.
 
 | Suite | Tests |
 |---|---|
@@ -333,11 +348,12 @@ docs/results/        bench.json, the benchmark log
 | `tests/pricing.test.ts` | 48 |
 | `tests/referee.test.ts` | 26 |
 | `tests/session.test.ts` | 12 |
+| `tests/villain.test.ts` | 32 |
 | `e2e/site.spec.ts` | 15 |
 | `e2e/game.spec.ts` | 14 |
 | `e2e/checker.spec.ts` | 5 |
 | `e2e/live.spec.ts` | 4 (live models; `npm run test:live`) |
-| **Total** | **1,972** |
+| **Total** | **2,004** |
 
 ## License
 

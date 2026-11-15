@@ -107,6 +107,13 @@ export default function HowPage() {
         Run on {measured.ranAt.slice(0, 10)}. The full log, every question and every line, is in <code>docs/results/bench.json</code> in the repository.
       </p>
 
+      <h2 className="caps">Why the voice is open weights</h2>
+      <p>
+        The same 40 villain scenes (taunt the detective, warn off a witness, frame an innocent) went to four cloud voices. Dolphin&apos;s open DeepSeek V4.1 Flash played 39 of 40 at a median 2.2 s. The closed models on SERV took 5.3 to 6.6 s; the
+        cheapest two also played every scene, and the Claude model refused twice and let three locked answers slip. Dolphin costs $0.01 per million input tokens against $0.13 to $1.25 for the closed models, and its weights cannot be swapped out
+        under a shipped game. Every line is in <code>docs/results/voice-bench.json</code>.
+      </p>
+
       <h2 className="caps">Who decides what</h2>
       <table className="plain">
         <tbody>
