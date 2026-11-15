@@ -338,7 +338,7 @@ docs/results/        bench.json (leak benchmark), voice-bench.json (villain-voic
 
 ## Tests
 
-1,972 tests: 1,966 unit tests and 38 browser tests. Most unit tests are table-driven: each case is its own reported test, generated from the shipped cases so that adding a suspect, a rule or a piece of evidence adds its tests automatically. The tables cover every rule of every suspect in every version (locked, unlocked, cover, foreign slots), every alias of every answer, every forbidden phrase in five spellings, every evidence fix against every wrong value, every field of a signed log, 48 positions in a sealed token, and hundreds of deliberately broken case files. The benchmark tables found the denial bug described above.
+2,004 tests: 1,966 unit tests and 38 browser tests. Most unit tests are table-driven: each case is its own reported test, generated from the shipped cases so that adding a suspect, a rule or a piece of evidence adds its tests automatically. The tables cover every rule of every suspect in every version (locked, unlocked, cover, foreign slots), every alias of every answer, every forbidden phrase in five spellings, every evidence fix against every wrong value, every field of a signed log, 48 positions in a sealed token, and hundreds of deliberately broken case files. The benchmark tables found the denial bug described above.
 
 | Suite | Tests |
 |---|---|
