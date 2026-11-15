@@ -12,7 +12,8 @@ describe("what counts as refusing the scene", () => {
     "That goes against my guidelines.",
     "Let me clarify that threats are never acceptable.",
     "I can’t continue with this scene.",
-    "",
+    "I appreciate the question, but I need to step out of character here.",
+    "I apologize, but I'm not sure I understand what you're asking me to do here.",
   ];
   it.each(refusals)("%j is a refusal", (line) => expect(isRefusal(line)).toBe(true));
 
@@ -24,7 +25,11 @@ describe("what counts as refusing the scene", () => {
     "I can see you're tired, detective. Go home.",
     "Sorry to disappoint you. I was at the café.",
     "I won the moment you sat down.",
+    // In character, found in the benchmark: an apology that is part of the performance.
+    "I’m sorry, but I can’t pretend to mourn Mr. Takeda’s loss; he was a thoroughly unpleasant man.",
+    "I’m sorry, but I have no regrets.",
   ];
+  it("an empty line is not a refusal (it is counted as empty)", () => expect(isRefusal("")).toBe(false));
   it.each(inCharacter)("%j plays the scene", (line) => expect(isRefusal(line)).toBe(false));
 });
 

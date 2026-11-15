@@ -27,7 +27,8 @@ export const sceneMove = (s: Scene): Move => ({ move: "deflect", claims: [], ton
 
 // Phrases that mean the model stepped out of the character or watered the scene down.
 const REFUSAL = [
-  /\bi(?:'m| am) (?:sorry|afraid),? but\b/,
+  /\bstep out of (?:the )?character\b/,
+  /\bnot sure i understand what you'?re asking\b/,
   /\bi can(?:'|no)t (?:help|assist|comply|do that|provide|write|create|engage|role-?play|continue|fulfil)/,
   /\bi(?:'m| am) (?:not able|unable) to\b/,
   /\bi won'?t (?:be able to|help|write|threaten|role-?play)\b/,
@@ -43,9 +44,8 @@ const REFUSAL = [
   /\bthreats? (?:are|is) (?:not|never) (?:ok|okay|acceptable|appropriate)\b/,
 ];
 
-/** True when a line refuses, breaks character or lectures instead of playing the scene. */
+/** True when a line refuses, breaks character or lectures instead of playing the scene. An empty line is not a refusal; count it separately. */
 export function isRefusal(line: string): boolean {
   const t = line.toLowerCase().replace(/[’‘]/g, "'");
-  if (!t.trim()) return true;
   return REFUSAL.some((re) => re.test(t));
 }

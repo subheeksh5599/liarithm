@@ -79,6 +79,7 @@ async function main() {
   }
   const summary = voices.map((v) => {
     const mine = rows.filter((r) => r.voice === v.name && !r.error);
+    const empty = mine.filter((r) => !(r.line as string)).length;
     const refused = mine.filter((r) => r.refusal).length;
     const leaked = mine.filter((r) => (r.leaks as string[]).length > 0).length;
     return {
@@ -86,9 +87,10 @@ async function main() {
       open: v.open,
       scenes: mine.length,
       errors: rows.filter((r) => r.voice === v.name && r.error).length,
+      empty,
       refusedOrBrokeCharacter: refused,
       leaked,
-      playedTheScene: mine.length - refused - leaked,
+      playedTheScene: mine.filter((r) => r.line && !r.refusal && (r.leaks as string[]).length === 0).length,
       msMedian: median(mine.map((r) => r.ms as number)),
     };
   });

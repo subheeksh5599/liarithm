@@ -10,7 +10,8 @@
     "test:e2e": "playwright test",
     "test:live": "E2E_LIVE=1 playwright test e2e/live.spec.ts",
     "bench": "tsx --env-file=.env.local scripts/bench.ts",
-    "check": "tsx scripts/check-cases.ts"
+    "check": "tsx scripts/check-cases.ts",
+    "bench:voice": "tsx --env-file=.env.local scripts/voice-bench.ts"
   },
   "dependencies": {
     "next": "^16.4.6",
